@@ -26,8 +26,6 @@ The Inventory Management System is a web-based application designed to help busi
 
 ### Installation
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
-
 1. Clone the repo
    ```sh
    https://github.com/mlutfiazizan13/inventory-management-system.git
