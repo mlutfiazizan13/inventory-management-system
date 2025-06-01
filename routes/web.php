@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('products')->group(function () {
         Route::get('', [ProductController::class,'index'])->name('products.index');
         Route::post('/store', [ProductController::class, 'store'])->name('products.store');
+        Route::patch('/update/{id}', [ProductController::class,'update'])->name('products.update');
     });
 });
 

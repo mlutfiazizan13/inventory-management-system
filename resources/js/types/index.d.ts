@@ -54,16 +54,26 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
-
+// Product
 export interface Product {
   id: number;
   name: string;
   sku: string;
   unit: string;
-  category_id: number;
-  brand_id: number;
+  category_id: string;
+  brand_id: string;
   currency: string; // 3-letter currency code, e.g., "IDR"
   price: number; // Decimal with 2 digits precision
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp
+}
+
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface Brand {
+  id: string;
+  name: string;
 }

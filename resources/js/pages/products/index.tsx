@@ -18,6 +18,7 @@ import { format, parseISO } from 'date-fns';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import CreateProduct from './create';
+import EditProduct from './edit';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -32,13 +33,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Products() {
     const { props } = usePage<PageProps<Product>>();
-    const { products = [], meta = {} } = props;
+    const { products = [], meta = {}, categories = [], brands = [] } = props;
 
     const columnHelper = createColumnHelper<Product>();
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    const [editOpen, setEditOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | nu>();
 
     const columns: ColumnDef<Product, any>[] = [
         columnHelper.accessor('id', {
@@ -83,10 +87,17 @@ export default function Products() {
             id: 'actions',
             header: () => 'Action',
             cell: ({ row }) => {
-                const user = row.original;
                 return (
                     <div className="flex gap-2">
-                        <Button variant={'default'}>Edit</Button>
+                        <Button
+                            onClick={() => {
+                                setEditOpen(true);
+                                setEditingProduct(row.original);
+                            }}
+                            variant={'default'}
+                        >
+                            Edit
+                        </Button>
                         <Button variant={'destructive'}>Delete</Button>
                     </div>
                 );
@@ -163,10 +174,10 @@ export default function Products() {
                                 }}
                             />
                         </div>
-                        <CreateProduct />
+                        <CreateProduct categories={categories} brands={brands} />
                     </div>
                 </div>
-                <div>
+                <div className="overflow-x-auto">
                     <table className="min-w-full overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
                         <thead className="bg-gray-100 dark:bg-gray-800">
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -174,7 +185,7 @@ export default function Products() {
                                     {headerGroup.headers.map((header) => (
                                         <th
                                             key={header.id}
-                                            className="border border-gray-200 bg-black px-4 py-2 text-white dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ width: header.getSize() }}
                                         >
@@ -253,6 +264,21 @@ export default function Products() {
                     </div>
                 </div>
             </div>
+
+            {editingProduct && (
+                <EditProduct
+                    product={editingProduct}
+                    brands={brands}
+                    categories={categories}
+                    open={editOpen}
+                    setOpen={(open: boolean) => {
+                        setEditOpen(open);
+                        if (!open) {
+                            setEditingProduct(null);
+                        }
+                    }}
+                />
+            )}
         </AppLayout>
     );
 }
