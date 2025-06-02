@@ -13,7 +13,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::all();
+        $products = Product::where('status', 'active')->get();
         $brands = Brand::select("id","name")->get();
         $categories = Category::select("id","name")->get();
         return Inertia::render("products/index", ["products" => $products, "categories"=> $categories, "brands" => $brands]);
@@ -83,6 +83,18 @@ class ProductController extends Controller
         $product->save();
 
         return redirect()->back()->with('success', 'Product updated successfully.');
+    }
+
+    public function delete(int $id) {
+        $product = Product::find($id);
+        if ($product == null) {
+            return redirect()->back()->with('error','Product not found');
+        }
+
+        $product->status = 'inactive';
+        $product->save();
+
+        return redirect()->back()->with('success','Product deleted successfully');
     }
 
     function generateSKU($category, $brand, $productName)

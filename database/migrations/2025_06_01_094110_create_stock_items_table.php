@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('product_id');
             $table->integer('quantity');
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }

@@ -25,31 +25,38 @@ class DatabaseSeeder extends Seeder
         $category =[
             [
                 "id" => "SHO",
-                "name"=> "Shoes"
+                "name"=> "Shoes",
+                "status"=> "active"
             ],
             [
                 "id" => "RUN",
-                "name"=> "Running Shoes"
+                "name"=> "Running Shoes",
+                "status"=> "active"
             ],
             [
                 "id" => "CAS",
-                "name"=> "Casual Shoes"
+                "name"=> "Casual Shoes",
+                "status"=> "active"
             ],
             [
                 "id" => "FRM",
-                "name"=> "Formal Shoes"
+                "name"=> "Formal Shoes",
+                "status"=> "active"
             ],
             [
                 "id" => "SPT",
-                "name"=> "Sports Shoes"
+                "name"=> "Sports Shoes",
+                "status"=> "active"
             ],
             [
                 "id" => "SNK",
-                "name"=> "Sneakers"
+                "name"=> "Sneakers",
+                "status"=> "active"
             ],
             [
                 "id" => "SDL",
-                "name"=> "Sandals / Slippers"
+                "name"=> "Sandals / Slippers",
+                "status"=> "active"
             ]];
 
         Category::insert($category);
@@ -57,31 +64,38 @@ class DatabaseSeeder extends Seeder
 
         $brands = [[
                 "id" => "NIK",
-                "name"=> "Nike"
+                "name"=> "Nike",
+                "status"=> "active"
             ],
             [
                 "id" => "ADI",
-                "name"=> "Adidas"
+                "name"=> "Adidas",
+                "status"=> "active"
             ],
             [
                 "id" => "PUM",
-                "name"=> "Puma"
+                "name"=> "Puma",
+                "status"=> "active"
             ],
             [
                 "id" => "REE",
-                "name"=> "Reebok"
+                "name"=> "Reebok",
+                "status"=> "active"
             ],
             [
                 "id" => "NWB",
-                "name"=> "New Balance"
+                "name"=> "New Balance",
+                "status"=> "active"
             ],
             [
                 "id" => "VNS",
-                "name"=> "Vans"
+                "name"=> "Vans",
+                "status"=> "active"
             ],
             [
                 "id" => "SKC",
-                "name"=> "Skechers"
+                "name"=> "Skechers",
+                "status"=> "active"
             ]
         ];
         Brand::insert($brands);

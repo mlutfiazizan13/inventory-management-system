@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('brand_id');
             $table->string('currency', 3)->default('IDR');
             $table->decimal('price', 10,2)->default(0.00);
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }
