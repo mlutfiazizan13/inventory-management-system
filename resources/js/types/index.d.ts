@@ -32,13 +32,12 @@ export interface SharedData {
 }
 
 interface PageProps<T = any> {
-  users: T[];
-  meta: {
-    total?: number;
-    filters?: {
-      search?: string;
-      sort?: string;
-    };
+  auth: {
+    user: User;
+  };
+  flash: {
+    message?: string;
+    error?: string;
   };
   [key: string]: any; 
 }
@@ -76,4 +75,14 @@ export interface Category {
 export interface Brand {
   id: string;
   name: string;
+}
+
+
+interface StockItem {
+  id: number;
+  product_id: string;
+  quantity: number;
+  status: string; // You could also use a union type if you know all possible statuses
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }

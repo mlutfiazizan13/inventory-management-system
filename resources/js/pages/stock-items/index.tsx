@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { useAppStore } from '@/stores/useAppStore';
 import { useProductStore } from '@/stores/useProductStore';
-import { PageProps, Product, type BreadcrumbItem } from '@/types';
+import { PageProps, StockItem, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -22,6 +22,8 @@ import { useEffect, useState } from 'react';
 import CreateProduct from './components/create';
 import EditProduct from './components/edit';
 import DeleteDialog from '@/components/modals/DeleteDialog';
+import { useStockItemStore } from '@/stores/useStockItemStore';
+import CreateStockItem from './components/create';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,21 +31,21 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
     {
-        title: 'Products',
-        href: '/products',
+        title: 'Stock Items',
+        href: '/stock-items',
     },
 ];
 
 export default function Products() {
     // useInertiaSync();
-    const { products = [], categories = [], brands = [] } = usePage<PageProps<Product>>().props;
+    const { stock_items = [], products = [] } = usePage<PageProps<StockItem>>().props;
 
-    const stopDeleting = useProductStore((state) => state.stopDeleting);
-    const { items, startEditing, setItems, startCreating, isDeleting,deletingItem, startDeleting} = useProductStore();
+    const stopDeleting = useStockItemStore((state) => state.stopDeleting);
+    const { items, startEditing, setItems, startCreating, isDeleting,deletingItem, startDeleting} = useStockItemStore();
 
     useEffect(() => {
-        setItems(products);
-    }, [products, setItems]);
+        setItems(stock_items);
+    }, [stock_items, setItems]);
 
     const { user } = useAppStore();
 
@@ -51,30 +53,18 @@ export default function Products() {
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    const columnHelper = createColumnHelper<Product>();
-    const columns: ColumnDef<Product, any>[] = [
+    const columnHelper = createColumnHelper<StockItem>();
+    const columns: ColumnDef<StockItem, any>[] = [
         columnHelper.accessor('id', {
             header: () => 'ID',
             cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('name', {
-            header: () => 'Name',
+        columnHelper.accessor('product_id', {
+            header: () => 'Product',
             cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('sku', {
-            header: () => 'SKU',
-            cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('unit', {
-            header: () => 'Unit',
-            cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('currency', {
-            header: () => 'Currency',
-            cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('price', {
-            header: () => 'Price',
+        columnHelper.accessor('quantity', {
+            header: () => 'Quantity',
             cell: (info) => info.getValue(),
         }),
         columnHelper.accessor('created_at', {
@@ -144,6 +134,7 @@ export default function Products() {
             },
             {
                 preserveState: true,
+                only: ['data', 'meta'],
                 onFinish: () => useAppStore.getState().setGlobalLoading(false),
             },
         );
@@ -158,6 +149,7 @@ export default function Products() {
 
                     <div className="flex gap-3">
                         <div className="">
+                            {/* <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" /> */}
                             <Input
                                 type="text"
                                 placeholder="Search.."
@@ -264,8 +256,8 @@ export default function Products() {
                 </div>
             </div>
 
-            {/* <CreateProduct brands={brands} categories={categories} /> */}
-            <CreateProduct brands={brands} categories={categories} />
+            <CreateStockItem products={products} />
+            {/* <CreateProduct brands={brands} categories={categories} />
 
             <EditProduct brands={brands} categories={categories} />
 
@@ -279,7 +271,7 @@ export default function Products() {
                     }}
                     itemName="product"
                     renderName={deletingItem?.name}
-                />
+                /> */}
         </AppLayout>
     );
 }
