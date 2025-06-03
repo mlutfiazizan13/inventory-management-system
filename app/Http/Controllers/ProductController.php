@@ -16,7 +16,7 @@ class ProductController extends Controller
         $products = Product::where('status', 'active')->get();
         $brands = Brand::select("id","name")->get();
         $categories = Category::select("id","name")->get();
-        return Inertia::render("products/index", ["products" => $products, "categories"=> $categories, "brands" => $brands]);
+        return Inertia::render("products/index", ["products" => Inertia::always($products), "categories"=> $categories, "brands" => $brands]);
     }
 
     public function show(Product $product)

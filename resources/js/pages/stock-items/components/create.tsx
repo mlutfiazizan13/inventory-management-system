@@ -7,18 +7,21 @@ import { Label } from '@/components/ui/label';
 
 import FormDialog from '@/components/modals/FormDialog';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Brand, Category, Product, StockItem } from '@/types';
 import { useStockItemStore } from '@/stores/useStockItemStore';
+import { Product, StockItem } from '@/types';
 
-export default function CreateStockItem({ products }: { products: Product[]; }) {
+export default function CreateStockItem({ products }: { products: Product[] }) {
     const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<Required<StockItem>>();
 
     const stopCreating = useStockItemStore((state) => state.stopCreating);
 
+    const { createItem } = useStockItemStore();
+
     const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
+        console.log('create');
         try {
-            await useStockItemStore((state) => state.createItem(data));
+            await createItem(data);
             reset(); // optional: reset form
         } catch (errs) {
             setError(errs as Record<keyof StockItem, string>);
@@ -33,7 +36,7 @@ export default function CreateStockItem({ products }: { products: Product[]; }) 
 
     return (
         <FormDialog
-            title="Create Product"
+            title="Create Stock Item"
             onSubmit={handleSubmit}
             onCancel={closeModal}
             submitText="Create"
@@ -42,7 +45,7 @@ export default function CreateStockItem({ products }: { products: Product[]; }) 
             onOpenChange={useStockItemStore((state) => state.stopCreating)}
         >
             <div className="grid grid-cols-1 gap-5">
-<div className="grid gap-2">
+                <div className="grid gap-2">
                     <Label htmlFor="product_id">Category</Label>
 
                     <Select name="product_id" onValueChange={(value) => setData('product_id', value)}>
@@ -79,7 +82,6 @@ export default function CreateStockItem({ products }: { products: Product[]; }) 
 
                     <InputError message={errors.quantity} />
                 </div>
-
             </div>
         </FormDialog>
     );

@@ -4,18 +4,12 @@ import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
 
 interface StockItemState {
-    // Local state management
-    items: StockItem[];
-
     // UI state
     isCreating: boolean;
     isEditing: boolean;
     editingItem: StockItem | null;
     isDeleting: boolean;
     deletingItem: StockItem | null;
-
-    // Basic CRUD operations
-    setItems: (items: StockItem[]) => void;
 
     // UI actions
     startCreating: () => void;
@@ -27,25 +21,18 @@ interface StockItemState {
 
     // Server actions (using Inertia)
     fetchItems: (params?: Record<string, any>) => void;
-    createItem: (data: Omit<StockItem, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
-    updateItem: (id: number, data: Partial<StockItem>) => Promise<void>;
+    createItem: (data: Omit<StockItem, 'id' | 'created_at' | 'updated_at' | 'product'>) => Promise<void>;
+    updateItem: (id: number, data: Partial<Omit<StockItem, 'product'>>) => Promise<void>;
     deleteItem: (id: number) => Promise<void>;
     // bulkDelete: (ids: number[]) => Promise<void>;
 }
 
 export const useStockItemStore = create<StockItemState>((set, get) => ({
-    // Initial state
-    items: [],
     isCreating: false,
     isEditing: false,
     editingItem: null,
     isDeleting: false,
     deletingItem: null,
-    
-
-    // Basic CRUD operations
-    setItems: (items: StockItem[]) => set({ items }),
-
 
     // UI state management
     startCreating: () => set({ isCreating: true }),

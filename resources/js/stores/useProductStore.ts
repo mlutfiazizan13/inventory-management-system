@@ -4,19 +4,15 @@ import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
 
 interface ProductState {
-    // Local state management
     items: Product[];
 
+    setItems: (items: Product[]) => void;
     // UI state
     isCreating: boolean;
     isEditing: boolean;
     editingItem: Product | null;
     isDeleting: boolean;
     deletingItem: Product | null;
-
-
-     // Basic CRUD operations
-    setItems: (items: Product[]) => void;
 
     // UI actions
     startCreating: () => void;
@@ -28,6 +24,7 @@ interface ProductState {
 
     // Server actions (using Inertia)
     fetchItems: (params?: Record<string, any>) => void;
+    reloadItems: (params?: Record<string, any>) => void;
     createItem: (data: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
     updateItem: (id: number, data: Partial<Product>) => Promise<void>;
     deleteItem: (id: number) => Promise<void>;
@@ -35,18 +32,14 @@ interface ProductState {
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
-    // Initial state
     items: [],
+    setItems: (items) => set({ items: items }),
+
     isCreating: false,
     isEditing: false,
     editingItem: null,
     isDeleting: false,
     deletingItem: null,
-    
-
-    // Basic CRUD operations
-    setItems: (items: Product[]) => set({ items }),
-
 
     // UI state management
     startCreating: () => set({ isCreating: true }),
@@ -64,12 +57,12 @@ export const useProductStore = create<ProductState>((set, get) => ({
             editingItem: null,
         }),
 
-    startDeleting: (item: Product) => 
-       set({
+    startDeleting: (item: Product) =>
+        set({
             isDeleting: true,
             deletingItem: item,
         }),
-    stopDeleting: () => 
+    stopDeleting: () =>
         set({
             isDeleting: false,
             deletingItem: null,
@@ -83,19 +76,25 @@ export const useProductStore = create<ProductState>((set, get) => ({
                 ...params,
             },
             {
-                preserveState: true,
+                preserveState: false,
                 preserveScroll: true,
             },
         );
     },
 
+    reloadItems: (params = {}) => {
+        router.reload({ only: ['products'] });
+    },
+
     createItem: async (data) => {
         return new Promise((resolve, reject) => {
             router.post(route('products.store'), data, {
+                preserveState: false,
                 preserveScroll: true,
                 onSuccess: (page) => {
                     get().stopCreating();
                     useAppStore.getState().addNotification('Item created successfully!', 'success');
+                    get().reloadItems();
                     resolve();
                 },
                 onError: (errors) => {
@@ -113,7 +112,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
                 onSuccess: () => {
                     get().stopEditing();
                     useAppStore.getState().addNotification('Item updated successfully!', 'success');
-                    resolve();
+                    get().reloadItems();
                 },
                 onError: (errors) => {
                     useAppStore.getState().addNotification('Failed to update item', 'error');
@@ -124,18 +123,16 @@ export const useProductStore = create<ProductState>((set, get) => ({
     },
 
     deleteItem: async (id) => {
-        return new Promise((resolve, reject) => {
-            router.delete(route('products.delete', id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    useAppStore.getState().addNotification('Item deleted successfully!', 'success');
-                    resolve();
-                },
-                onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to delete item', 'error');
-                    reject(errors);
-                },
-            });
+        await router.delete(route('products.delete', id), {
+            preserveState: false, // force reload fresh data
+            preserveScroll: false,
+            onSuccess: () => {
+                useAppStore.getState().addNotification('Item deleted successfully!', 'success');
+            },
+            onError: (errors) => {
+                useAppStore.getState().addNotification('Failed to delete item', 'error');
+                throw errors;
+            },
         });
     },
 

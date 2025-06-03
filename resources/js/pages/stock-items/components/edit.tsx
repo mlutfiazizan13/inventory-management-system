@@ -7,23 +7,23 @@ import { Label } from '@/components/ui/label';
 
 import FormDialog from '@/components/modals/FormDialog';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useProductStore } from '@/stores/useProductStore';
-import { Brand, Category, Product } from '@/types';
+import { useStockItemStore } from '@/stores/useStockItemStore';
+import { EditStockItem as EditStockItemType, Product } from '@/types';
 
-export default function EditStockItem({ categories, brands }: { categories: Category[]; brands: Brand[] }) {
-    const { data, setData, post, processing, reset, errors, setError, clearErrors } = useForm<Required<Product>>();
+export default function EditStockItem({ products }: { products: Product[] }) {
+    const { data, setData, post, processing, reset, errors, setError, clearErrors } = useForm<Required<EditStockItemType>>();
 
-    const stopEditing = useProductStore((state) => state.stopEditing);
+    const stopEditing = useStockItemStore((state) => state.stopEditing);
 
-    const { editingItem, updateItem } = useProductStore();
+    const { editingItem, updateItem } = useStockItemStore();
 
     useEffect(() => {
-        if (useProductStore.getState().isEditing && editingItem) {
+        if (useStockItemStore.getState().isEditing && editingItem) {
             setData({
                 ...editingItem,
             });
         }
-    }, [useProductStore.getState().isEditing, editingItem]);
+    }, [useStockItemStore.getState().isEditing, editingItem]);
 
     const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
@@ -31,7 +31,7 @@ export default function EditStockItem({ categories, brands }: { categories: Cate
             await updateItem(data.id, data);
             reset(); // optional: reset form
         } catch (errs) {
-            setError(errs as Record<keyof Product, string>);
+            setError(errs as Record<keyof EditStockItemType, string>);
         }
     };
 
@@ -48,55 +48,23 @@ export default function EditStockItem({ categories, brands }: { categories: Cate
             onCancel={closeModal}
             submitText="Edit"
             processing={processing}
-            open={useProductStore().isEditing}
-            onOpenChange={useProductStore((state) => state.stopEditing)}
+            open={useStockItemStore().isEditing}
+            onOpenChange={useStockItemStore((state) => state.stopEditing)}
         >
             <div className="grid grid-cols-1 gap-5">
                 <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="product_id">Category</Label>
 
-                    <Input
-                        id="name"
-                        type="text"
-                        name="name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        placeholder="Name"
-                        autoComplete="current-name"
-                    />
-
-                    <InputError message={errors.name} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="unit">Unit</Label>
-
-                    <Input
-                        id="unit"
-                        type="text"
-                        name="unit"
-                        value={data.unit}
-                        onChange={(e) => setData('unit', e.target.value)}
-                        placeholder="Unit"
-                        autoComplete="current-unit"
-                    />
-
-                    <InputError message={errors.unit} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="category_id">Category</Label>
-
-                    <Select name="category_id" onValueChange={(value) => setData('category_id', value)} value={data.category_id}>
+                    <Select name="product_id" onValueChange={(value) => setData('product_id', value)}>
                         <SelectTrigger>
-                            <SelectValue id="category_id" placeholder="Select Category..." />
+                            <SelectValue id="product_id" placeholder="Select Product..." />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
-                                {categories.map((category) => {
+                                {products.map((product) => {
                                     return (
-                                        <SelectItem key={category.id} value={category.id}>
-                                            {category.name}
+                                        <SelectItem key={product.id} value={String(product.id)}>
+                                            {product.name}
                                         </SelectItem>
                                     );
                                 })}
@@ -104,64 +72,22 @@ export default function EditStockItem({ categories, brands }: { categories: Cate
                         </SelectContent>
                     </Select>
 
-                    <InputError message={errors.category_id} />
+                    <InputError message={errors.product_id} />
                 </div>
 
                 <div className="grid gap-2">
-                    <Label htmlFor="brand_id">Brand</Label>
-
-                    <Select name="brand_id" onValueChange={(value) => setData('brand_id', value)} value={data.brand_id}>
-                        <SelectTrigger>
-                            <SelectValue id="brand_id" placeholder="Select Brand..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                {brands.map((brand) => {
-                                    return (
-                                        <SelectItem key={brand.id} value={brand.id}>
-                                            {brand.name}
-                                        </SelectItem>
-                                    );
-                                })}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-
-                    <InputError message={errors.brand_id} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="currency">Currency</Label>
-
-                    <Select name="currency" onValueChange={(value) => setData('currency', value)} value={data.currency}>
-                        <SelectTrigger>
-                            <SelectValue id="currency" placeholder="Select Currency..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="IDR">IDR</SelectItem>
-                                <SelectItem value="USD">USD</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-
-                    <InputError message={errors.currency} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label htmlFor="price">Price</Label>
+                    <Label htmlFor="quantity">Quantity</Label>
 
                     <Input
-                        id="price"
+                        id="quantity"
                         type="number"
-                        name="price"
-                        value={data.price}
-                        onChange={(e) => setData('price', parseFloat(e.target.value) || 0)}
-                        placeholder="Price"
-                        autoComplete="current-price"
+                        name="quantity"
+                        onChange={(e) => setData('quantity', Number.parseInt(e.target.value))}
+                        placeholder="Quantity"
+                        autoComplete="current-quantity"
                     />
 
-                    <InputError message={errors.name} />
+                    <InputError message={errors.quantity} />
                 </div>
             </div>
         </FormDialog>

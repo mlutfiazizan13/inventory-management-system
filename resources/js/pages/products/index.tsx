@@ -1,3 +1,4 @@
+import DeleteDialog from '@/components/modals/DeleteDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
@@ -17,11 +18,11 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, RefreshCw, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CreateProduct from './components/create';
 import EditProduct from './components/edit';
-import DeleteDialog from '@/components/modals/DeleteDialog';
+import { useInertiaSync, useProductInertiaSync } from '@/hooks/useInertiaSync';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,15 +36,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Products() {
-    // useInertiaSync();
-    const { products = [], categories = [], brands = [] } = usePage<PageProps<Product>>().props;
+    const page = usePage<PageProps<Product>>();
+
+    const { products = [], categories = [], brands = [] } = page.props;
 
     const stopDeleting = useProductStore((state) => state.stopDeleting);
-    const { items, startEditing, setItems, startCreating, isDeleting,deletingItem, startDeleting} = useProductStore();
+
+    const { startEditing, startCreating, startDeleting, deletingItem } = useProductStore();
 
     useEffect(() => {
-        setItems(products);
-    }, [products, setItems]);
+        // Lakukan fetch dari server saat komponen mount
+        router.reload({ only: ['products'] });
+    }, []);
 
     const { user } = useAppStore();
 
@@ -97,14 +101,11 @@ export default function Products() {
             cell: ({ row }) => {
                 return (
                     <div className="flex gap-2">
-                        <Button onClick={() => startEditing(row.original)} variant={'default'}>
-                            Edit
+                        <Button onClick={() => startEditing(row.original)} >
+                            <Edit/>
                         </Button>
-                        <Button
-                            onClick={() => startDeleting(row.original)}
-                            variant={'destructive'}
-                        >
-                            Delete
+                        <Button onClick={() => startDeleting(row.original)} >
+                            <Trash className='text-destructive'/>
                         </Button>
                     </div>
                 );
@@ -113,7 +114,7 @@ export default function Products() {
     ];
 
     const table = useReactTable({
-        data: items,
+        data: products,
         columns,
         state: {
             sorting,
@@ -132,23 +133,6 @@ export default function Products() {
         },
     });
 
-    // Handle refresh with filters
-    const refreshWithFilters = () => {
-        useAppStore.getState().setGlobalLoading(true);
-        router.get(
-            window.location.pathname,
-            {
-                search: globalFilter,
-                sort: sorting.length > 0 ? sorting[0].id : null,
-                direction: sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null,
-            },
-            {
-                preserveState: true,
-                onFinish: () => useAppStore.getState().setGlobalLoading(false),
-            },
-        );
-    };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
@@ -163,17 +147,16 @@ export default function Products() {
                                 placeholder="Search.."
                                 value={globalFilter ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalFilter(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        refreshWithFilters();
-                                    }
-                                }}
                             />
                         </div>
                         {/* <Button onClick={() => setCreateOpen(true) }>Create</Button> */}
-                        <Button onClick={() => {
-                            startCreating()
-                        }}>Create</Button>
+                        <Button
+                            onClick={() => {
+                                startCreating();
+                            }}
+                        >
+                            Create
+                        </Button>
                     </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -191,9 +174,9 @@ export default function Products() {
                                             <div className="flex items-center justify-between">
                                                 {flexRender(header.column.columnDef.header, header.getContext())}
                                                 {{
-                                                    asc: <ChevronUp />,
-                                                    desc: <ChevronDown />,
-                                                }[header.column.getIsSorted()] ?? null}
+                                                    asc: <ArrowUp size={14}/>,
+                                                    desc: <ArrowDown size={14} />,
+                                                }[header.column.getIsSorted()] ?? <ArrowUpDown size={14}/>}
                                             </div>
                                         </th>
                                     ))}
@@ -270,16 +253,16 @@ export default function Products() {
             <EditProduct brands={brands} categories={categories} />
 
             <DeleteDialog<Product | null, number>
-                    resource={useProductStore().deletingItem}
-                    id={deletingItem?.id}
-                    onDelete={useProductStore().deleteItem}
-                    open={useProductStore.getState().isDeleting}
-                    onOpenChange={() => {
-                        stopDeleting()
-                    }}
-                    itemName="product"
-                    renderName={deletingItem?.name}
-                />
+                resource={useProductStore().deletingItem}
+                id={deletingItem?.id}
+                onDelete={useProductStore().deleteItem}
+                open={useProductStore.getState().isDeleting}
+                onOpenChange={() => {
+                    stopDeleting();
+                }}
+                itemName="product"
+                renderName={deletingItem?.name}
+            />
         </AppLayout>
     );
 }

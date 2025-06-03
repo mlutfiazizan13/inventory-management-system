@@ -1,8 +1,9 @@
+import DeleteDialog from '@/components/modals/DeleteDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { useAppStore } from '@/stores/useAppStore';
-import { useProductStore } from '@/stores/useProductStore';
+import { useStockItemStore } from '@/stores/useStockItemStore';
 import { PageProps, StockItem, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
@@ -17,13 +18,10 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import CreateProduct from './components/create';
-import EditProduct from './components/edit';
-import DeleteDialog from '@/components/modals/DeleteDialog';
-import { useStockItemStore } from '@/stores/useStockItemStore';
 import CreateStockItem from './components/create';
+import EditProduct from './components/edit';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -36,16 +34,17 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Products() {
-    // useInertiaSync();
-    const { stock_items = [], products = [] } = usePage<PageProps<StockItem>>().props;
+export default function StockItems() {
+    const page = usePage<PageProps<StockItem>>();
+    const { stock_items = [], products = [] } = page.props;
 
     const stopDeleting = useStockItemStore((state) => state.stopDeleting);
-    const { items, startEditing, setItems, startCreating, isDeleting,deletingItem, startDeleting} = useStockItemStore();
+    const { startEditing, startCreating, isDeleting, deletingItem, startDeleting } = useStockItemStore();
 
     useEffect(() => {
-        setItems(stock_items);
-    }, [stock_items, setItems]);
+        // Lakukan fetch dari server saat komponen mount
+        router.reload({ only: ['stock_items'] });
+    }, []);
 
     const { user } = useAppStore();
 
@@ -59,8 +58,12 @@ export default function Products() {
             header: () => 'ID',
             cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('product_id', {
+        columnHelper.accessor('product.name', {
             header: () => 'Product',
+            cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('product.sku', {
+            header: () => 'SKU',
             cell: (info) => info.getValue(),
         }),
         columnHelper.accessor('quantity', {
@@ -90,10 +93,7 @@ export default function Products() {
                         <Button onClick={() => startEditing(row.original)} variant={'default'}>
                             Edit
                         </Button>
-                        <Button
-                            onClick={() => startDeleting(row.original)}
-                            variant={'destructive'}
-                        >
+                        <Button onClick={() => startDeleting(row.original)} variant={'destructive'}>
                             Delete
                         </Button>
                     </div>
@@ -103,7 +103,7 @@ export default function Products() {
     ];
 
     const table = useReactTable({
-        data: items,
+        data: stock_items,
         columns,
         state: {
             sorting,
@@ -133,7 +133,7 @@ export default function Products() {
                 direction: sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : null,
             },
             {
-                preserveState: true,
+                preserveState: false,
                 only: ['data', 'meta'],
                 onFinish: () => useAppStore.getState().setGlobalLoading(false),
             },
@@ -163,9 +163,13 @@ export default function Products() {
                             />
                         </div>
                         {/* <Button onClick={() => setCreateOpen(true) }>Create</Button> */}
-                        <Button onClick={() => {
-                            startCreating()
-                        }}>Create</Button>
+                        <Button
+                            onClick={() => {
+                                startCreating();
+                            }}
+                        >
+                            Create
+                        </Button>
                     </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -183,9 +187,9 @@ export default function Products() {
                                             <div className="flex items-center justify-between">
                                                 {flexRender(header.column.columnDef.header, header.getContext())}
                                                 {{
-                                                    asc: <ChevronUp />,
-                                                    desc: <ChevronDown />,
-                                                }[header.column.getIsSorted()] ?? null}
+                                                    asc: <ArrowUp size={14} />,
+                                                    desc: <ArrowDown size={14} />,
+                                                }[header.column.getIsSorted()] ?? <ArrowUpDown size={14} />}
                                             </div>
                                         </th>
                                     ))}
@@ -257,21 +261,20 @@ export default function Products() {
             </div>
 
             <CreateStockItem products={products} />
-            {/* <CreateProduct brands={brands} categories={categories} />
 
-            <EditProduct brands={brands} categories={categories} />
+            <EditProduct products={products} />
 
-            <DeleteDialog<Product | null, number>
-                    resource={useProductStore().deletingItem}
-                    id={deletingItem?.id}
-                    onDelete={useProductStore().deleteItem}
-                    open={useProductStore.getState().isDeleting}
-                    onOpenChange={() => {
-                        stopDeleting()
-                    }}
-                    itemName="product"
-                    renderName={deletingItem?.name}
-                /> */}
+            <DeleteDialog<StockItem | null, number>
+                resource={useStockItemStore().deletingItem}
+                id={deletingItem?.id}
+                onDelete={useStockItemStore().deleteItem}
+                open={useStockItemStore.getState().isDeleting}
+                onOpenChange={() => {
+                    stopDeleting();
+                }}
+                itemName="product"
+                renderName={deletingItem?.product.name}
+            />
         </AppLayout>
     );
 }

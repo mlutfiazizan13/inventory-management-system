@@ -14,11 +14,12 @@ export default function CreateProduct({ categories, brands }: { categories: Cate
     const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<Required<Product>>();
 
     const stopCreating = useProductStore((state) => state.stopCreating);
+    const {createItem} = useProductStore();
 
     const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
         try {
-            await useProductStore((state) => state.createItem(data));
+            await createItem(data);
             reset(); // optional: reset form
         } catch (errs) {
             setError(errs as Record<keyof Product, string>);

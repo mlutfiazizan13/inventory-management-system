@@ -20,6 +20,7 @@ export interface NavItem {
     href: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    preserveState?: boolean;
 }
 
 export interface SharedData {
@@ -63,6 +64,7 @@ export interface Product {
   brand_id: string;
   currency: string; // 3-letter currency code, e.g., "IDR"
   price: number; // Decimal with 2 digits precision
+  status: string;
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp
 }
@@ -79,6 +81,17 @@ export interface Brand {
 
 
 interface StockItem {
+  id: number;
+  product_id: string;
+  quantity: number;
+  product: Product;
+  status: string; // You could also use a union type if you know all possible statuses
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
+}
+
+
+interface EditStockItem {
   id: number;
   product_id: string;
   quantity: number;
