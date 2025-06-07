@@ -4,9 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,82 +24,88 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        $category =[
+        $category = [
             [
                 "id" => "SHO",
-                "name"=> "Shoes",
-                "status"=> "active"
+                "name" => "Shoes",
+                "status" => "active"
             ],
             [
                 "id" => "RUN",
-                "name"=> "Running Shoes",
-                "status"=> "active"
+                "name" => "Running Shoes",
+                "status" => "active"
             ],
             [
                 "id" => "CAS",
-                "name"=> "Casual Shoes",
-                "status"=> "active"
+                "name" => "Casual Shoes",
+                "status" => "active"
             ],
             [
                 "id" => "FRM",
-                "name"=> "Formal Shoes",
-                "status"=> "active"
+                "name" => "Formal Shoes",
+                "status" => "active"
             ],
             [
                 "id" => "SPT",
-                "name"=> "Sports Shoes",
-                "status"=> "active"
+                "name" => "Sports Shoes",
+                "status" => "active"
             ],
             [
                 "id" => "SNK",
-                "name"=> "Sneakers",
-                "status"=> "active"
+                "name" => "Sneakers",
+                "status" => "active"
             ],
             [
                 "id" => "SDL",
-                "name"=> "Sandals / Slippers",
-                "status"=> "active"
-            ]];
+                "name" => "Sandals / Slippers",
+                "status" => "active"
+            ]
+        ];
 
         Category::insert($category);
 
 
-        $brands = [[
+        $brands = [
+            [
                 "id" => "NIK",
-                "name"=> "Nike",
-                "status"=> "active"
+                "name" => "Nike",
+                "status" => "active"
             ],
             [
                 "id" => "ADI",
-                "name"=> "Adidas",
-                "status"=> "active"
+                "name" => "Adidas",
+                "status" => "active"
             ],
             [
                 "id" => "PUM",
-                "name"=> "Puma",
-                "status"=> "active"
+                "name" => "Puma",
+                "status" => "active"
             ],
             [
                 "id" => "REE",
-                "name"=> "Reebok",
-                "status"=> "active"
+                "name" => "Reebok",
+                "status" => "active"
             ],
             [
                 "id" => "NWB",
-                "name"=> "New Balance",
-                "status"=> "active"
+                "name" => "New Balance",
+                "status" => "active"
             ],
             [
                 "id" => "VNS",
-                "name"=> "Vans",
-                "status"=> "active"
+                "name" => "Vans",
+                "status" => "active"
             ],
             [
                 "id" => "SKC",
-                "name"=> "Skechers",
-                "status"=> "active"
+                "name" => "Skechers",
+                "status" => "active"
             ]
         ];
         Brand::insert($brands);
+
+        $this->call(RoleSeeder::class);
+        $this->call(UserSeeder::class);
+
     }
 }

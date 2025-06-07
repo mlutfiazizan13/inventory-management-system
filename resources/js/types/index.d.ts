@@ -17,10 +17,11 @@ export interface NavGroup {
 
 export interface NavItem {
     title: string;
-    href: string;
+    href?: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
     preserveState?: boolean;
+    children?: NavItem[];
 }
 
 export interface SharedData {
@@ -49,10 +50,29 @@ export interface User {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    roles?: Role[];
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    // [key: string]: unknown;
 }
+
+
+export interface CreateUser {
+    name: string;
+    email: string;
+    role_id: number;
+    password: string;
+    password_confirmation: string;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  status: string; // can restrict more tightly if needed
+  created_at: string; // or Date, depending on your API or ORM
+  updated_at: string;
+}
+
 
 // Product
 export interface Product {
