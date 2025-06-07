@@ -89,12 +89,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
     createItem: async (data) => {
         return new Promise((resolve, reject) => {
             router.post(route('products.store'), data, {
-                preserveState: false,
                 preserveScroll: true,
                 onSuccess: (page) => {
                     get().stopCreating();
                     useAppStore.getState().addNotification('Item created successfully!', 'success');
-                    get().reloadItems();
                     resolve();
                 },
                 onError: (errors) => {
@@ -112,7 +110,6 @@ export const useProductStore = create<ProductState>((set, get) => ({
                 onSuccess: () => {
                     get().stopEditing();
                     useAppStore.getState().addNotification('Item updated successfully!', 'success');
-                    get().reloadItems();
                 },
                 onError: (errors) => {
                     useAppStore.getState().addNotification('Failed to update item', 'error');
@@ -124,7 +121,6 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
     deleteItem: async (id) => {
         await router.delete(route('products.delete', id), {
-            preserveState: false, // force reload fresh data
             preserveScroll: false,
             onSuccess: () => {
                 useAppStore.getState().addNotification('Item deleted successfully!', 'success');

@@ -18,11 +18,12 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, RefreshCw, Trash } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CreateProduct from './components/create';
 import EditProduct from './components/edit';
 import { useInertiaSync, useProductInertiaSync } from '@/hooks/useInertiaSync';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -44,10 +45,10 @@ export default function Products() {
 
     const { startEditing, startCreating, startDeleting, deletingItem } = useProductStore();
 
-    useEffect(() => {
-        // Lakukan fetch dari server saat komponen mount
-        router.reload({ only: ['products'] });
-    }, []);
+    // useEffect(() => {
+    //     // Lakukan fetch dari server saat komponen mount
+    //     router.reload({ only: ['products'] });
+    // }, []);
 
     const { user } = useAppStore();
 
@@ -98,16 +99,24 @@ export default function Products() {
         columnHelper.display({
             id: 'actions',
             header: () => 'Action',
+            size: 50,
             cell: ({ row }) => {
                 return (
-                    <div className="flex gap-2">
-                        <Button onClick={() => startEditing(row.original)} >
-                            <Edit/>
-                        </Button>
-                        <Button onClick={() => startDeleting(row.original)} >
-                            <Trash className='text-destructive'/>
-                        </Button>
-                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild className='w-full'>
+                            <Button variant="ghost"><EllipsisVertical /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="start">
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem onClick={() => startEditing(row.original)}>
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className='text-destructive' onClick={() => startDeleting(row.original)}>
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 );
             },
         }),
@@ -167,16 +176,16 @@ export default function Products() {
                                     {headerGroup.headers.map((header) => (
                                         <th
                                             key={header.id}
-                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-primary-foreground dark:text-gray-100"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ width: header.getSize() }}
                                         >
                                             <div className="flex items-center justify-between">
                                                 {flexRender(header.column.columnDef.header, header.getContext())}
                                                 {{
-                                                    asc: <ArrowUp size={14}/>,
+                                                    asc: <ArrowUp size={14} />,
                                                     desc: <ArrowDown size={14} />,
-                                                }[header.column.getIsSorted()] ?? <ArrowUpDown size={14}/>}
+                                                }[header.column.getIsSorted()] ?? <ArrowUpDown size={14} />}
                                             </div>
                                         </th>
                                     ))}

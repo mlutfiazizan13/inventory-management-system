@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { useProductStore } from '@/stores/useProductStore';
 import { Brand, Category, Product } from '@/types';
 
+
 export default function CreateProduct({ categories, brands }: { categories: Category[]; brands: Brand[] }) {
     const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<Required<Product>>();
 
