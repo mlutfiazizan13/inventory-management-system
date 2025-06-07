@@ -119,3 +119,16 @@ interface EditStockItem {
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp
 }
+
+
+interface Supplier {
+  id: number;
+  name: string;
+  contact_name: string | undefined;
+  email: string | undefined;
+  phone: string;
+  address: string | undefined;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}

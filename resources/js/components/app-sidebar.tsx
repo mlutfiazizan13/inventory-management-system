@@ -8,7 +8,7 @@ import { BookOpen, Folder, LayoutGrid, Package, Users, Users2, Warehouse } from 
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
-    
+
     {
         title: 'Dashboard',
         href: '/dashboard',
@@ -39,6 +39,11 @@ const mainNavItems: NavItem[] = [
         title: 'Stock Items',
         href: '/stock-items',
         icon: Warehouse,
+    },
+    {
+        title: 'Suppliers',
+        href: '/suppliers',
+        icon: Warehouse,
     }
 ];
 
@@ -67,7 +72,7 @@ export function AppSidebar() {
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                    
+
                 </SidebarMenu>
             </SidebarHeader>
 
