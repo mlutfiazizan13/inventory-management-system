@@ -24,7 +24,7 @@ class StockItemController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "product_id"=> "required|unique",
+            "product_id"=> "required|unique:stock_items,product_id",
             "quantity"=> "required",
         ]);
 

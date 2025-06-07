@@ -18,10 +18,11 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CreateStockItem from './components/create';
 import EditProduct from './components/edit';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -87,16 +88,24 @@ export default function StockItems() {
         columnHelper.display({
             id: 'actions',
             header: () => 'Action',
+            size: 50,
             cell: ({ row }) => {
                 return (
-                    <div className="flex gap-2">
-                        <Button onClick={() => startEditing(row.original)} variant={'default'}>
-                            Edit
-                        </Button>
-                        <Button onClick={() => startDeleting(row.original)} variant={'destructive'}>
-                            Delete
-                        </Button>
-                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild className='w-full'>
+                            <Button variant="ghost"><EllipsisVertical /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="start">
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem onClick={() => startEditing(row.original)}>
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className='text-destructive' onClick={() => startDeleting(row.original)}>
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 );
             },
         }),
@@ -142,10 +151,10 @@ export default function StockItems() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Products" />
+            <Head title="Stock Items" />
             <div className="container mx-auto p-4">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Products</h1>
+                    <h1 className="text-2xl font-bold">Stock Items</h1>
 
                     <div className="flex gap-3">
                         <div className="">
@@ -180,7 +189,7 @@ export default function StockItems() {
                                     {headerGroup.headers.map((header) => (
                                         <th
                                             key={header.id}
-                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-primary-foreground dark:text-gray-100"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ width: header.getSize() }}
                                         >

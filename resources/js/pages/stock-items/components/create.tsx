@@ -8,10 +8,18 @@ import { Label } from '@/components/ui/label';
 import FormDialog from '@/components/modals/FormDialog';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStockItemStore } from '@/stores/useStockItemStore';
-import { Product, StockItem } from '@/types';
+import { Product } from '@/types';
+
+interface CreateStockItemType {
+  id: number;
+  product_id: string;
+  quantity: number;
+}
 
 export default function CreateStockItem({ products }: { products: Product[] }) {
-    const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<Required<StockItem>>();
+    const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<Required<CreateStockItemType>>();
+
+    console.log("INIT",errors);
 
     const stopCreating = useStockItemStore((state) => state.stopCreating);
 
@@ -24,7 +32,9 @@ export default function CreateStockItem({ products }: { products: Product[] }) {
             await createItem(data);
             reset(); // optional: reset form
         } catch (errs) {
-            setError(errs as Record<keyof StockItem, string>);
+            let validationError = errs as Record<keyof CreateStockItemType, string>
+            setError(validationError);
+            console.log(validationError);
         }
     };
 
