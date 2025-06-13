@@ -13,6 +13,7 @@ interface FormDialogProps {
     submitVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    className?: string;
 }
 
 export default function FormDialog({
@@ -25,7 +26,8 @@ export default function FormDialog({
     processing = false,
     submitVariant = "default",
     open,
-    onOpenChange
+    onOpenChange,
+    className,
 }: FormDialogProps) {
     const handleSubmit: FormEventHandler = (e) => {
         onSubmit(e);
@@ -33,7 +35,7 @@ export default function FormDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className={className}>
                 <DialogTitle>{title}</DialogTitle>
                 <hr />
 

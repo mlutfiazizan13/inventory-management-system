@@ -132,3 +132,29 @@ interface Supplier {
   created_at: string;
   updated_at: string;
 }
+
+
+interface PurchaseOrder {
+  id: string; // BIGINT
+  supplier_id: number; // FOREIGN KEY to suppliers
+  order_date: string; // DATE (ISO string format, e.g. "2024-01-01")
+  expected_date?: string; // DATE, optional
+  status: 'draft' | 'ordered' | 'received' | string; // ENUM
+  total_amount: number; // DECIMAL
+  notes?: string; // TEXT, optional
+  purchase_order_items: PurchaseOrderItem[];
+  created_at: string; // TIMESTAMP
+  updated_at: string; // TIMESTAMP
+}
+
+interface PurchaseOrderItem {
+  id: string;
+  purchase_order_id: string;
+  product_id: number;
+  quantity: number;
+  unit_price: number; // represents DECIMAL(20,2)
+  status: string; // could be more specific like: 'active' | 'cancelled' etc.
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+}
+
