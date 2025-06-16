@@ -25,6 +25,7 @@ import CreateSupplier from './components/create';
 import EditSupplier from './components/edit';
 import { cn } from '@/lib/utils';
 import CreatePurchaseOrder from './components/create';
+import EditPurchaseOrder from './components/edit';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -244,8 +245,7 @@ export default function PurchaseOrders() {
 
             <CreatePurchaseOrder suppliers={suppliers} products={products}/>
 
-{/* 
-            <EditSupplier/> */}
+            <EditPurchaseOrder suppliers={suppliers} products={products}/>
 
             <DeleteDialog<PurchaseOrder | null, string>
                 resource={usePurchaseOrderStore().deletingItem}

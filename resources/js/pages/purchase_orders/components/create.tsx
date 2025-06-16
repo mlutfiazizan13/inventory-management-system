@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ type CreatePurchaseOrder = {
     supplier_id: number
     order_date: string
     expected_date: string
-    total_amount: number
+    total_cost: number
     notes: string
     purchase_order_items: {
         product_id: number | null,
@@ -34,7 +34,7 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
         supplier_id: 0,
         order_date: '',
         expected_date: '',
-        total_amount: 0,
+        total_cost: 0,
         notes: '',
         purchase_order_items: [{
             product_id: null,
@@ -46,6 +46,8 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
     const stopCreating = usePurchaseOrderStore((state) => state.stopCreating);
     const { createItem } = usePurchaseOrderStore();
 
+    const [editingIndex, setEditingIndex] = useState(null);
+
 
     const addItem = () => {
         setData('purchase_order_items', [
@@ -55,12 +57,19 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
     }
 
     const updateItem = (index: number, field: string, value: number) => {
-        const updatedItems = data.purchase_order_items.map((item, i) =>
-            i === index ? { ...item, [field]: value } : item
-        )
-        console.log(updatedItems);
-        setData('purchase_order_items', updatedItems)
+        setData((current) => {
+            // create updated array
+            const updatedItems = current.purchase_order_items.map((item, i) =>
+                i === index ? { ...item, [field]: value } : item
+            )
+
+            return {
+                ...current,
+                purchase_order_items: updatedItems,
+            }
+        })
     }
+
 
 
     const removeItem = (index: number) => {
@@ -82,6 +91,16 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
         reset();
         stopCreating();
     };
+
+    useEffect(() => {
+        const totalCost = data.purchase_order_items.reduce((total, item) => {
+            return total + item.quantity * item.unit_price;
+        }, 0);
+        setData((current) => ({
+            ...current,
+            total_amount: totalCost,
+        }));
+    }, [data.purchase_order_items]);
 
     return (
         <FormDialog
@@ -128,8 +147,8 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                     placeholder="Order Date"
                     autoComplete="current-order_date"
                 />
-
                 <InputError message={errors.order_date} />
+
             </div>
 
             <div className="grid gap-2">
@@ -172,10 +191,9 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                                             value={String(data.purchase_order_items[index].product_id)}
                                             onValueChange={(value) => {
                                                 const product = products.find(p => p.id === parseInt(value));
-                                                console.log(product!.id);
+                                                console.log("product_id : " + product!.id);
                                                 updateItem(index, 'product_id', product!.id)
-                                                console.log(data.purchase_order_items[index].product_id)
-                                                // updateItem(index, 'unit_price', product?.price ?? 0)
+                                                updateItem(index, 'unit_price', product?.price ?? 0)
                                             }}>
                                             <SelectTrigger>
                                                 <SelectValue id="product_id" placeholder="Select Product..." />
@@ -212,19 +230,28 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                                             name='unit_price'
                                             type="text"
                                             placeholder="Unit Price"
-                                            value={formatRupiah(data.purchase_order_items[index].unit_price)}
-                                            onChange={e => updateItem(index, 'unit_price', parseFloat(e.target.value))}
+                                            value={
+                                                editingIndex === index
+                                                    ? item.unit_price
+                                                    : formatRupiah(item.unit_price)
+                                            }
+                                            onFocus={() => setEditingIndex(index)}
+                                            onBlur={() => setEditingIndex(null)}
+                                            onChange={(e) => {
+                                                const parsed = parseFloat(e.target.value.replace(/[^\d.-]/g, ''));
+                                                updateItem(index, "unit_price", isNaN(parsed) ? 0 : parsed);
+                                            }}
                                         />
                                         <InputError message={errors.purchase_order_items} />
                                     </div>
                                 </div>
                                 {index > 0 ?
-                                    <Button variant={'destructive'}
+                                    <Button type='button' variant={'destructive'}
                                         onClick={() => removeItem(index)}>
                                         <Trash />
                                     </Button>
                                     :
-                                    <Button
+                                    <Button type='button'
                                         onClick={() => addItem()}>
                                         <Plus />
                                     </Button>
@@ -261,6 +288,7 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                             </div>
                         </div>
                     })}
+                    <p>Total Cost : {data.total_cost}</p>
                 </CollapsibleContent>
             </Collapsible>
         </FormDialog>

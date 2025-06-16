@@ -1,23 +1,23 @@
-import { CreatePurchaseOrder, PurchaseOrder } from '@/types';
+import { EditPurchaseOrder, PurchaseOrder } from '@/types';
 import { router } from '@inertiajs/react';
 import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
 
-interface PurchaseOrderState<T, C> {
+interface PurchaseOrderState<T, C, E> {
     items: T[];
 
     setItems: (items: T[]) => void;
     // UI state
     isCreating: boolean;
     isEditing: boolean;
-    editingItem: T | null;
+    editingItem: E | null;
     isDeleting: boolean;
     deletingItem: T | null;
 
     // UI actions
     startCreating: () => void;
     stopCreating: () => void;
-    startEditing: (item: T) => void;
+    startEditing: (item: E) => void;
     stopEditing: () => void;
     startDeleting: (item: T) => void;
     stopDeleting: () => void;
@@ -31,7 +31,7 @@ interface PurchaseOrderState<T, C> {
     // bulkDelete: (ids: number[]) => Promise<void>;
 }
 
-export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, CreatePurchaseOrder>>((set, get) => ({
+export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, PurchaseOrder, EditPurchaseOrder>>((set, get) => ({
     items: [],
     setItems: (items) => set({ items: items }),
 

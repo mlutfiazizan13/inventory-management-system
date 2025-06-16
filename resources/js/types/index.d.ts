@@ -140,11 +140,26 @@ interface PurchaseOrder {
   order_date: string; // DATE (ISO string format, e.g. "2024-01-01")
   expected_date?: string; // DATE, optional
   status: 'draft' | 'ordered' | 'received' | string; // ENUM
-  total_amount: number; // DECIMAL
+  total_cost: number; // DECIMAL
   notes?: string; // TEXT, optional
   purchase_order_items: PurchaseOrderItem[];
   created_at: string; // TIMESTAMP
   updated_at: string; // TIMESTAMP
+}
+
+type EditPurchaseOrder = {
+    supplier_id: number
+    order_date: string
+    expected_date: string
+    total_cost: number
+    notes: string
+    purchase_order_items: EditPurchaseOrderItem[]
+}
+
+type EditPurchaseOrderItem = {
+    product_id: number | null;
+    quantity: number;
+    unit_price: number;
 }
 
 interface PurchaseOrderItem {

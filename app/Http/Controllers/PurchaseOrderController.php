@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use App\Models\PurchaseOrder;
-use App\Models\Supplier;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use App\Models\Product;
+use App\Models\Supplier;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class PurchaseOrderController extends Controller
 {
@@ -30,30 +33,43 @@ class PurchaseOrderController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            "name" => "required",
-            "contact_name" => "nullable",
-            "email" => "nullable|email",
-            "phone" => "required",
-            "address" => "nullable",
+            "supplier_id" => "required",
+            "order_date" => "required",
+            "expected_date" => "required",
+            "purchase_order_items" => "array",
+            "purchase_order_items.*.product_id" => "required",
+            "purchase_order_items.*.quantity" => "required",
+            "purchase_order_items.*.unit_price" => "required",
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        DB::beginTransaction();
 
+        $purchase_order = new PurchaseOrder();
+        $purchase_order->id = Str::uuid();
+        $purchase_order->supplier_id = $request->supplier_id;
 
-        // dd($request);
+        $purchase_order->order_date = $request->order_date;
+        $purchase_order->expected_date = $request->expected_date;
+        $purchase_order->supplier_id = $request->supplier_id;
+        $purchase_order->total_cost = $request->total_cost;
+        $purchase_order->save();
 
-        $supplier = new Supplier();
-        $supplier->name = $request->name;
-        $supplier->contact_name = $request->contact_name;
-        $supplier->email = $request->email;
-        $supplier->phone = $request->phone;
-        $supplier->address = $request->address;
-        $supplier->save();
+        foreach ($request->purchase_order_items as $item) {
+            $po_item = new PurchaseOrderItem();
+            $po_item->id = Str::uuid();
+            $po_item->purchase_order_id = $purchase_order->id;
+            $po_item->product_id = $item['product_id'];
+            $po_item->quantity = $item['quantity'];
+            $po_item->unit_price = $item['unit_price'];
+            $po_item->save();
+        }
 
-        return redirect()->back()->with('success', 'Supplier created successfully.');
+        DB::commit();
+        return redirect()->back()->with('success', 'Purchase Order created successfully.');
     }
 
     public function update(Request $request, int $id)
