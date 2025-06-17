@@ -17,7 +17,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, EllipsisVertical, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, Ellipsis, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePurchaseOrderStore } from '@/stores/usePurchaseOrderStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -26,6 +26,7 @@ import EditSupplier from './components/edit';
 import { cn } from '@/lib/utils';
 import CreatePurchaseOrder from './components/create';
 import EditPurchaseOrder from './components/edit';
+import { formatRupiah } from '@/utils/currency-format';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,7 +42,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function PurchaseOrders() {
     const page = usePage<PageProps<PurchaseOrder>>();
 
-    const { purchase_orders = [], suppliers = [] , products = []} = page.props;
+    const { purchase_orders = [], suppliers = [], products = [] } = page.props;
 
     const stopDeleting = usePurchaseOrderStore((state) => state.stopDeleting);
 
@@ -66,6 +67,36 @@ export default function PurchaseOrders() {
             size: 50,
             cell: (info) => info.row.index + 1,
         }),
+        columnHelper.accessor('supplier.name', {
+            header: () => 'Supplier',
+            cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('order_date', {
+            header: () => 'Order Date',
+            cell: ({ getValue }) => {
+                const date = parseISO(getValue());
+                return format(date, 'yyyy-MM-dd');
+            },
+        }),
+        columnHelper.accessor('expected_date', {
+            header: () => 'Expected Date',
+            cell: ({ getValue }) => {
+                const date = parseISO(getValue());
+                return format(date, 'yyyy-MM-dd');
+            },
+        }),
+        columnHelper.accessor('total_cost', {
+            header: () => 'Total Cost',
+            cell: (info) => formatRupiah(info.getValue()),
+        }),
+        columnHelper.accessor('purchase_order_status', {
+            header: () => 'PO Status',
+            cell: (info) => (
+                <span className="capitalize">
+                    {info.getValue()}
+                </span>
+            ),
+        }),
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
             cell: ({ getValue }) => {
@@ -88,10 +119,13 @@ export default function PurchaseOrders() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><EllipsisVertical /></Button>
+                            <Button variant="ghost"><Ellipsis /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
+                                <DropdownMenuItem>
+                                    Update Status
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => startEditing(row.original)}>
                                     Edit
                                 </DropdownMenuItem>
@@ -243,9 +277,9 @@ export default function PurchaseOrders() {
             </div>
 
 
-            <CreatePurchaseOrder suppliers={suppliers} products={products}/>
+            <CreatePurchaseOrder suppliers={suppliers} products={products} />
 
-            <EditPurchaseOrder suppliers={suppliers} products={products}/>
+            <EditPurchaseOrder suppliers={suppliers} products={products} />
 
             <DeleteDialog<PurchaseOrder | null, string>
                 resource={usePurchaseOrderStore().deletingItem}

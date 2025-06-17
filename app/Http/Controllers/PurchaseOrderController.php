@@ -16,7 +16,7 @@ class PurchaseOrderController extends Controller
 {
     public function index()
     {
-        $purchase_orders = PurchaseOrder::where('status', 'active')->get();
+        $purchase_orders = PurchaseOrder::with('Supplier')->where('status', 'active')->get();
         $suppliers = Supplier::where('status', 'active')->get();
         $products = Product::where('status', 'active')->get();
 

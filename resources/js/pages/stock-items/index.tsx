@@ -18,7 +18,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, EllipsisVertical, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CreateStockItem from './components/create';
 import EditProduct from './components/edit';
@@ -74,14 +74,18 @@ export default function StockItems() {
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-'; // or return null, '' or 'N/A'
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
         columnHelper.accessor('updated_at', {
             header: () => 'Updated At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-';
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
@@ -93,7 +97,7 @@ export default function StockItems() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><EllipsisVertical /></Button>
+                            <Button variant="ghost"><Ellipsis/></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
