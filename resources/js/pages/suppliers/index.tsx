@@ -1,8 +1,11 @@
 import DeleteDialog from '@/components/modals/DeleteDialog';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
+import { useSupplierStore } from '@/stores/useSupplierStore';
 import { PageProps, Supplier, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
@@ -17,13 +20,10 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, EllipsisVertical, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useSupplierStore } from '@/stores/useSupplierStore';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import CreateSupplier from './components/create';
 import EditSupplier from './components/edit';
-import { cn } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -83,22 +83,25 @@ export default function Suppliers() {
         columnHelper.accessor('address', {
             header: () => 'Address',
             meta: {
-                className: 'text-wrap'
+                className: 'text-wrap',
             },
             cell: (info) => info.getValue(),
-            
         }),
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-'; // or return null, '' or 'N/A'
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
         columnHelper.accessor('updated_at', {
             header: () => 'Updated At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-';
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
@@ -109,15 +112,15 @@ export default function Suppliers() {
             cell: ({ row }) => {
                 return (
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><EllipsisVertical /></Button>
+                        <DropdownMenuTrigger asChild className="w-full">
+                            <Button variant="ghost">
+                                <EllipsisVertical />
+                            </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
-                                <DropdownMenuItem onClick={() => startEditing(row.original)}>
-                                    Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className='text-destructive' onClick={() => startDeleting(row.original)}>
+                                <DropdownMenuItem onClick={() => startEditing(row.original)}>Edit</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => startDeleting(row.original)}>
                                     Delete
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
@@ -182,7 +185,7 @@ export default function Suppliers() {
                                     {headerGroup.headers.map((header) => (
                                         <th
                                             key={header.id}
-                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-primary-foreground dark:text-gray-100"
+                                            className="dark:bg-primary-foreground border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:text-gray-100"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ width: header.getSize() }}
                                         >
@@ -204,8 +207,9 @@ export default function Suppliers() {
                                     {row.getVisibleCells().map((cell) => (
                                         <td
                                             key={cell.id}
-                                            className={cn(`border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100`,
-                                                cell.column.columnDef.meta?.className ?? ""
+                                            className={cn(
+                                                `border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100`,
+                                                cell.column.columnDef.meta?.className ?? '',
                                             )}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -264,8 +268,8 @@ export default function Suppliers() {
                 </div>
             </div>
 
-            <CreateSupplier/>
-            <EditSupplier/>
+            <CreateSupplier />
+            <EditSupplier />
 
             <DeleteDialog<Supplier | null, number>
                 resource={useSupplierStore().deletingItem}
