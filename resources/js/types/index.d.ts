@@ -137,9 +137,11 @@ interface Supplier {
 interface PurchaseOrder {
   id: string; // BIGINT
   supplier_id: number; // FOREIGN KEY to suppliers
+  supplier?: Supplier
   order_date: string; // DATE (ISO string format, e.g. "2024-01-01")
   expected_date?: string; // DATE, optional
-  status: 'draft' | 'ordered' | 'received' | string; // ENUM
+  purchase_order_status: 'draft' | 'ordered' | 'received' | string; 
+  status: string;
   total_cost: number; // DECIMAL
   notes?: string; // TEXT, optional
   purchase_order_items: PurchaseOrderItem[];

@@ -38,13 +38,18 @@ class DashboardController extends Controller
         $statusCounts = PurchaseOrder::select('purchase_order_status', DB::raw('COUNT(id) as total'))
             ->groupBy('purchase_order_status')->get();
 
-        $purchases = PurchaseOrder::select(
-            DB::raw('MONTH(order_date) as month'),
-            DB::raw('SUM(total_cost) as total')
-        )
-            ->groupBy('month')->get();
+        $purchases = PurchaseOrder::select([
+            DB::raw("DATE_FORMAT(order_date, '%M') as month"),
+            DB::raw('SUM(total_cost) as total'),
+            DB::raw('MONTH(order_date) as month_number'), // Add numeric month for sorting
+        ])
+            ->groupBy('month', 'month_number') // Group by both if needed
+            ->orderBy('month_number')
+            ->get();
 
         $stockProducts = Product::with('inventory')->get();
+
+        $latestPurchaseOrders = PurchaseOrder::with('Supplier')->where('status', 'active')->orderBy('created_at')->limit(5)->get();
 
         return Inertia::render('dashboard', [
             'totalProducts' => $totalProducts,
@@ -55,6 +60,7 @@ class DashboardController extends Controller
             'statusCounts' => $statusCounts,
             'purchases' => $purchases,
             'stockProducts' => $stockProducts,
+            'latestPurchaseOrders' => $latestPurchaseOrders
         ]);
     }
 }
