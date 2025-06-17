@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -117,5 +118,27 @@ class ProductSeeder extends Seeder
         ];
 
         DB::table('products')->insert($products);
+
+        // Assign fake IDs for simulation purposes
+        $productsWithId = [];
+        $productIds = [];
+
+        foreach ($products as $index => $product) {
+            $id = $index + 1; // Simulate DB id starting at 1
+            $product['id'] = $id;
+            $productsWithId[] = $product;
+            $productIds[$product['sku']] = $id;
+        }
+
+        // Create stock items
+        $stock_items = array_map(function ($product) {
+            return [
+                'product_id' => $product['id'],
+                'quantity' => 10, // Default quantity
+                'status' => $product['status'], // Use product status or set custom
+            ];
+        }, $productsWithId);
+
+        DB::table('stock_items')->insert($stock_items);
     }
 }

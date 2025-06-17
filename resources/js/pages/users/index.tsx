@@ -17,7 +17,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, Ellipsis, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CreateUser from './components/create';
 import EditUser from './components/edit';
@@ -96,7 +96,7 @@ export default function Users() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><EllipsisVertical /></Button>
+                            <Button variant="ghost"><Ellipsis/></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>

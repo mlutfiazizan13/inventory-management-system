@@ -98,7 +98,7 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
         }, 0);
         setData((current) => ({
             ...current,
-            total_amount: totalCost,
+            total_cost: totalCost,
         }));
     }, [data.purchase_order_items]);
 
@@ -288,7 +288,7 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                             </div>
                         </div>
                     })}
-                    <p>Total Cost : {data.total_cost}</p>
+                    <p>Total Cost : {formatRupiah(data.total_cost)}</p>
                 </CollapsibleContent>
             </Collapsible>
         </FormDialog>

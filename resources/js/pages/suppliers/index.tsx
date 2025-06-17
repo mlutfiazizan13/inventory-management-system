@@ -20,7 +20,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, EllipsisVertical, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CreateSupplier from './components/create';
 import EditSupplier from './components/edit';
@@ -112,10 +112,8 @@ export default function Suppliers() {
             cell: ({ row }) => {
                 return (
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild className="w-full">
-                            <Button variant="ghost">
-                                <EllipsisVertical />
-                            </Button>
+                        <DropdownMenuTrigger asChild className='w-full'>
+                            <Button variant="ghost"><Ellipsis/></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>

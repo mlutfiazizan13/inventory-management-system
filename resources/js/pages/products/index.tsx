@@ -18,12 +18,13 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, Ellipsis, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import CreateProduct from './components/create';
 import EditProduct from './components/edit';
 import { useInertiaSync, useProductInertiaSync } from '@/hooks/useInertiaSync';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { formatRupiah } from '@/utils/currency-format';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -74,25 +75,29 @@ export default function Products() {
             header: () => 'Unit',
             cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('currency', {
-            header: () => 'Currency',
-            cell: (info) => info.getValue(),
-        }),
+        // columnHelper.accessor('currency', {
+        //     header: () => 'Currency',
+        //     cell: (info) => info.getValue(),
+        // }),
         columnHelper.accessor('price', {
             header: () => 'Price',
-            cell: (info) => info.getValue(),
+            cell: (info) => formatRupiah(info.getValue())
         }),
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-'; // or return null, '' or 'N/A'
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
         columnHelper.accessor('updated_at', {
             header: () => 'Updated At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-';
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
@@ -104,7 +109,7 @@ export default function Products() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><EllipsisVertical /></Button>
+                            <Button variant="ghost"><Ellipsis /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
