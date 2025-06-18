@@ -121,7 +121,7 @@ interface EditStockItem {
 }
 
 
-interface Supplier {
+export interface Supplier {
   id: number;
   name: string;
   contact_name: string | undefined;
@@ -134,35 +134,38 @@ interface Supplier {
 }
 
 
-interface PurchaseOrder {
-  id: string; // BIGINT
-  supplier_id: number; // FOREIGN KEY to suppliers
-  order_date: string; // DATE (ISO string format, e.g. "2024-01-01")
-  expected_date?: string; // DATE, optional
-  status: 'draft' | 'ordered' | 'received' | string; // ENUM
-  total_cost: number; // DECIMAL
-  notes?: string; // TEXT, optional
+export interface PurchaseOrder {
+  id: string;
+  supplier_id: number;
+  supplier?: Supplier
+  order_date: string;
+  expected_date?: string;
+  purchase_order_status: 'draft' | 'ordered' | 'received' | string;
+  status: string;
+  total_cost: number;
+  notes?: string;
   purchase_order_items: PurchaseOrderItem[];
-  created_at: string; // TIMESTAMP
-  updated_at: string; // TIMESTAMP
+  created_at: string;
+  updated_at: string;
 }
 
-type EditPurchaseOrder = {
-    supplier_id: number
-    order_date: string
-    expected_date: string
-    total_cost: number
-    notes: string
-    purchase_order_items: EditPurchaseOrderItem[]
+export type EditPurchaseOrder = {
+  id: string,
+  supplier_id: number
+  order_date: string
+  expected_date: string
+  total_cost: number
+  notes: string
+  purchase_order_items: EditPurchaseOrderItem[]
 }
 
-type EditPurchaseOrderItem = {
-    product_id: number | null;
-    quantity: number;
-    unit_price: number;
+export type EditPurchaseOrderItem = {
+  product_id: number | null;
+  quantity: number;
+  unit_price: number;
 }
 
-interface PurchaseOrderItem {
+export interface PurchaseOrderItem {
   id: string;
   purchase_order_id: string;
   product_id: number;

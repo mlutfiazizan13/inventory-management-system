@@ -13,6 +13,8 @@ interface PurchaseOrderState<T, C, E> {
     editingItem: E | null;
     isDeleting: boolean;
     deletingItem: T | null;
+    isUpdateStatus: boolean,
+    updateStatusItem: T | null;
 
     // UI actions
     startCreating: () => void;
@@ -22,12 +24,16 @@ interface PurchaseOrderState<T, C, E> {
     startDeleting: (item: T) => void;
     stopDeleting: () => void;
 
+    startUpdateStatus: (item: T) => void;
+    stopUpdateStatus: () => void;
+
     // Server actions (using Inertia)
     fetchItems: (params?: Record<string, any>) => void;
     reloadItems: (params?: Record<string, any>) => void;
     createItem: (data: C) => Promise<void>;
-    updateItem: (id: number, data: Partial<T>) => Promise<void>;
+    updateItem: (id: number | string, data: Partial<T>) => Promise<void>;
     deleteItem: (id: number | string) => Promise<void>;
+    updateStatus: (id: number | string) => Promise<void>;
     // bulkDelete: (ids: number[]) => Promise<void>;
 }
 
@@ -40,6 +46,9 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
     editingItem: null,
     isDeleting: false,
     deletingItem: null,
+
+    isUpdateStatus: false,
+    updateStatusItem: null,
 
     // UI state management
     startCreating: () => set({ isCreating: true }),
@@ -66,6 +75,17 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
         set({
             isDeleting: false,
             deletingItem: null,
+        }),
+
+    startUpdateStatus: (item: PurchaseOrder) =>
+        set({
+            isUpdateStatus: true,
+            updateStatusItem: item,
+        }),
+    stopUpdateStatus: () =>
+        set({
+            isUpdateStatus: false,
+            updateStatusItem: null,
         }),
 
     // Server operations using Inertia
@@ -129,6 +149,22 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
                 useAppStore.getState().addNotification('Failed to delete item', 'error');
                 throw errors;
             },
+        });
+    },
+
+    updateStatus: async (id) => {
+        return new Promise((resolve, reject) => {
+            router.put(route('purchase_orders.update_status', id), {}, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    get().stopUpdateStatus();
+                    useAppStore.getState().addNotification('Purchase Order status updated successfully!', 'success');
+                },
+                onError: (errors) => {
+                    useAppStore.getState().addNotification('Failed to update item', 'error');
+                    reject(errors);
+                },
+            });
         });
     },
 

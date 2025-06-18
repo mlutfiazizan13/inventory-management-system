@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import CreatePurchaseOrder from './components/create';
 import EditPurchaseOrder from './components/edit';
 import { formatRupiah } from '@/utils/currency-format';
+import UpdateStatus from './components/update-status';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -42,11 +43,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function PurchaseOrders() {
     const page = usePage<PageProps<PurchaseOrder>>();
 
-    const { purchase_orders = [], suppliers = [], products = [] } = page.props;
+    const { data, purchase_orders = [], suppliers = [], products = [] } = page.props;
 
     const stopDeleting = usePurchaseOrderStore((state) => state.stopDeleting);
+    const stopUpdateStatus = usePurchaseOrderStore((state) => state.stopUpdateStatus);
 
-    const { startEditing, startCreating, startDeleting, deletingItem } = usePurchaseOrderStore();
+
+    const { startEditing, startCreating, startDeleting, deletingItem, startUpdateStatus, updateStatusItem } = usePurchaseOrderStore();
 
     useEffect(() => {
         // Lakukan fetch dari server saat komponen mount
@@ -124,11 +127,21 @@ export default function PurchaseOrders() {
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
                                 <DropdownMenuItem>
-                                    Update Status
+                                    Show Items
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => startEditing(row.original)}>
-                                    Edit
-                                </DropdownMenuItem>
+
+                                {row.original.purchase_order_status !== 'received' &&
+                                    <DropdownMenuItem onClick={() => startUpdateStatus(row.original)}>
+                                        Update Status
+                                    </DropdownMenuItem>
+                                }
+
+                                {row.original.purchase_order_status == 'draft' &&
+                                    <DropdownMenuItem onClick={() => startEditing(row.original)}>
+                                        Edit
+                                    </DropdownMenuItem>
+                                }
+
                                 <DropdownMenuItem className='text-destructive' onClick={() => startDeleting(row.original)}>
                                     Delete
                                 </DropdownMenuItem>
@@ -280,6 +293,15 @@ export default function PurchaseOrders() {
             <CreatePurchaseOrder suppliers={suppliers} products={products} />
 
             <EditPurchaseOrder suppliers={suppliers} products={products} />
+
+            <UpdateStatus<string>
+                title='Update Status'
+                message='are you sure to update this status ?'
+                onOpenChange={() => stopUpdateStatus()}
+                onSubmit={usePurchaseOrderStore().updateStatus}
+                open={usePurchaseOrderStore.getState().isUpdateStatus}
+                id={updateStatusItem?.id}
+            />
 
             <DeleteDialog<PurchaseOrder | null, string>
                 resource={usePurchaseOrderStore().deletingItem}

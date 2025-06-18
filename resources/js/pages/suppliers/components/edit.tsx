@@ -30,7 +30,6 @@ export default function EditSupplier() {
             await updateItem(data.id, data);
             reset(); // optional: reset form
         } catch (errs) {
-            console.log(errs);
             setError(errs as Record<keyof Supplier, string>);
         }
     };

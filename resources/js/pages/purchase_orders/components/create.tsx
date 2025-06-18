@@ -111,7 +111,7 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
             processing={processing}
             open={usePurchaseOrderStore().isCreating}
             onOpenChange={usePurchaseOrderStore((state) => state.stopCreating)}
-            className='min-w-xl'
+            className='min-w-2xl'
         >
             <div className="grid gap-2">
                 <Label htmlFor="supplier_id">Supplier</Label>
@@ -188,10 +188,9 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                                     <div className="grid gap-2">
                                         <Select
                                             name="product_id"
-                                            value={String(data.purchase_order_items[index].product_id)}
+                                            value={data.purchase_order_items[index].product_id ? String(data.purchase_order_items[index].product_id) : undefined}
                                             onValueChange={(value) => {
                                                 const product = products.find(p => p.id === parseInt(value));
-                                                console.log("product_id : " + product!.id);
                                                 updateItem(index, 'product_id', product!.id)
                                                 updateItem(index, 'unit_price', product?.price ?? 0)
                                             }}>
@@ -278,7 +277,6 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                 <CollapsibleContent className="flex flex-col gap-2">
                     {data.purchase_order_items.map((item, index) => {
                         const product = products.find(p => p.id === item.product_id);
-                        console.log(item.product_id);
 
                         return <div key={`product-summary-${index}`} className='flex justify-between'>
                             <p className='font-bold'>{product?.name}</p>
@@ -288,7 +286,11 @@ export default function CreatePurchaseOrder({ suppliers, products }: { suppliers
                             </div>
                         </div>
                     })}
-                    <p>Total Cost : {formatRupiah(data.total_cost)}</p>
+                    <hr />
+                    <div className='flex justify-between font-bold'>
+                        <p>Total Cost</p>
+                        <p>{formatRupiah(data.total_cost)}</p>
+                    </div>
                 </CollapsibleContent>
             </Collapsible>
         </FormDialog>

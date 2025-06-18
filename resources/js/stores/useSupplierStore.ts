@@ -87,8 +87,6 @@ export const useSupplierStore = create<SupplierState>((set, get) => ({
     },
 
     createItem: async (data) => {
-        console.log("create");
-        
         return new Promise((resolve, reject) => {
             router.post(route('suppliers.store'), data, {
                 preserveScroll: true,
