@@ -27,12 +27,10 @@ export default function EditProduct({ categories, brands }: { categories: Catego
 
     const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
-        console.log("test")
         try {
             await updateItem(data.id, data);
             reset(); // optional: reset form
         } catch (errs) {
-            console.log(errs);
             setError(errs as Record<keyof Product, string>);
         }
     };

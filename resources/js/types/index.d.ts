@@ -111,7 +111,7 @@ interface StockItem {
 }
 
 
-interface EditStockItem {
+export interface EditStockItem {
   id: number;
   product_id: string;
   quantity: number;
@@ -176,3 +176,14 @@ export interface PurchaseOrderItem {
   updated_at: string; // ISO date string
 }
 
+export interface StockAdjustment {
+  id: bigint;
+  product_id: int;
+  product: Product;
+  adjustment_type: string;
+  quantity: number;
+  reason: string;
+  adjusted_by: User;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+}

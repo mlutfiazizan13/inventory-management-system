@@ -20,6 +20,7 @@ return new class extends Migration
             $table->dateTime('received_at')->nullable(); // DATETIME
             $table->text('notes')->nullable();
             $table->string('purchase_order_status')->default('draft');
+            $table->bigInteger('created_by');
             $table->string('status')->default('active');
             $table->timestamps(); 
         });

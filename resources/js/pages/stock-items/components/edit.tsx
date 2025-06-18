@@ -55,7 +55,7 @@ export default function EditStockItem({ products }: { products: Product[] }) {
                 <div className="grid gap-2">
                     <Label htmlFor="product_id">Category</Label>
 
-                    <Select name="product_id" onValueChange={(value) => setData('product_id', value)}>
+                    <Select name="product_id" value={data.product_id} onValueChange={(value) => setData('product_id', value)} disabled>
                         <SelectTrigger>
                             <SelectValue id="product_id" placeholder="Select Product..." />
                         </SelectTrigger>
@@ -83,6 +83,7 @@ export default function EditStockItem({ products }: { products: Product[] }) {
                         type="number"
                         name="quantity"
                         onChange={(e) => setData('quantity', Number.parseInt(e.target.value))}
+                        value={data.quantity} 
                         placeholder="Quantity"
                         autoComplete="current-quantity"
                     />

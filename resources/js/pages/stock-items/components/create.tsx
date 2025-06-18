@@ -19,22 +19,18 @@ interface CreateStockItemType {
 export default function CreateStockItem({ products }: { products: Product[] }) {
     const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<Required<CreateStockItemType>>();
 
-    console.log("INIT",errors);
-
     const stopCreating = useStockItemStore((state) => state.stopCreating);
 
     const { createItem } = useStockItemStore();
 
     const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
-        console.log('create');
         try {
             await createItem(data);
             reset(); // optional: reset form
         } catch (errs) {
             let validationError = errs as Record<keyof CreateStockItemType, string>
             setError(validationError);
-            console.log(validationError);
         }
     };
 
