@@ -1,12 +1,9 @@
 import DeleteDialog from '@/components/modals/DeleteDialog';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
-import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
-import { useSupplierStore } from '@/stores/useSupplierStore';
-import { PageProps, Supplier, type BreadcrumbItem } from '@/types';
+import { PageProps, PurchaseOrder, SalesOrder, Supplier, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -20,10 +17,17 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, Ellipsis, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSalesOrderStore } from '@/stores/useSalesOrderStore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import CreateSupplier from './components/create';
 import EditSupplier from './components/edit';
+import { cn } from '@/lib/utils';
+import CreateSalesOrder from './components/create';
+import EditSalesOrder from './components/edit';
+import { formatRupiah } from '@/utils/currency-format';
+import UpdateStatus from './components/update-status';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,23 +35,25 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
     {
-        title: 'Suppliers',
-        href: '/suppliers',
+        title: 'Sales Orders',
+        href: '/sales-orders',
     },
 ];
 
-export default function Suppliers() {
-    const page = usePage<PageProps<Supplier>>();
+export default function Salesrders() {
+    const page = usePage<PageProps<SalesOrder>>();
 
-    const { suppliers = [] } = page.props;
+    const { data, sales_orders = [], customers = [], products = [] } = page.props;
 
-    const stopDeleting = useSupplierStore((state) => state.stopDeleting);
+    const stopDeleting = useSalesOrderStore((state) => state.stopDeleting);
+    const stopUpdateStatus = useSalesOrderStore((state) => state.stopUpdateStatus);
 
-    const { startEditing, startCreating, startDeleting, deletingItem } = useSupplierStore();
+
+    const { startEditing, startCreating, startDeleting, deletingItem, startUpdateStatus, updateStatusItem } = useSalesOrderStore();
 
     useEffect(() => {
         // Lakukan fetch dari server saat komponen mount
-        router.reload({ only: ['suppliers'] });
+        router.reload({ only: ['sales_orders'] });
     }, []);
 
     const { user } = useAppStore();
@@ -56,52 +62,48 @@ export default function Suppliers() {
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    const columnHelper = createColumnHelper<Supplier>();
-    const columns: ColumnDef<Supplier, any>[] = [
+    const columnHelper = createColumnHelper<SalesOrder>();
+    const columns: ColumnDef<SalesOrder, any>[] = [
         columnHelper.display({
             id: 'no',
             header: () => 'No',
             size: 50,
             cell: (info) => info.row.index + 1,
         }),
-        columnHelper.accessor('name', {
-            header: () => 'Name',
+        columnHelper.accessor('customer.name', {
+            header: () => 'Customer',
             cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('contact_name', {
-            header: () => 'Contact Name',
-            cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('email', {
-            header: () => 'Email',
-            cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('phone', {
-            header: () => 'Phone',
-            cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('address', {
-            header: () => 'Address',
-            meta: {
-                className: 'text-wrap',
+        columnHelper.accessor('order_date', {
+            header: () => 'Order Date',
+            cell: ({ getValue }) => {
+                const date = parseISO(getValue());
+                return format(date, 'yyyy-MM-dd');
             },
-            cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('total_amount', {
+            header: () => 'Total Amount',
+            cell: (info) => formatRupiah(info.getValue()),
+        }),
+        columnHelper.accessor('sales_status', {
+            header: () => 'PO Status',
+            cell: (info) => (
+                <span className="capitalize">
+                    {info.getValue()}
+                </span>
+            ),
         }),
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
             cell: ({ getValue }) => {
-                const value = getValue();
-                if (!value) return '-'; // or return null, '' or 'N/A'
-                const date = parseISO(value);
+                const date = parseISO(getValue());
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
         columnHelper.accessor('updated_at', {
             header: () => 'Updated At',
             cell: ({ getValue }) => {
-                const value = getValue();
-                if (!value) return '-';
-                const date = parseISO(value);
+                const date = parseISO(getValue());
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
@@ -113,12 +115,22 @@ export default function Suppliers() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><Ellipsis/></Button>
+                            <Button variant="ghost"><Ellipsis /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
-                                <DropdownMenuItem onClick={() => startEditing(row.original)}>Edit</DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive" onClick={() => startDeleting(row.original)}>
+                                <DropdownMenuItem>
+                                    Show Items
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem onClick={() => startUpdateStatus(row.original)}>
+                                    Update Status
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem onClick={() => startEditing(row.original)}>
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className='text-destructive' onClick={() => startDeleting(row.original)}>
                                     Delete
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
@@ -130,7 +142,7 @@ export default function Suppliers() {
     ];
 
     const table = useReactTable({
-        data: suppliers,
+        data: sales_orders,
         columns,
         state: {
             sorting,
@@ -151,10 +163,10 @@ export default function Suppliers() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Suppliers" />
+            <Head title="Sales Orders" />
             <div className="container mx-auto p-4">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Suppliers</h1>
+                    <h1 className="text-2xl font-bold">Sales Orders</h1>
 
                     <div className="flex gap-3">
                         <div className="">
@@ -183,7 +195,7 @@ export default function Suppliers() {
                                     {headerGroup.headers.map((header) => (
                                         <th
                                             key={header.id}
-                                            className="dark:bg-primary-foreground border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:text-gray-100"
+                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-primary-foreground dark:text-gray-100"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ width: header.getSize() }}
                                         >
@@ -205,9 +217,8 @@ export default function Suppliers() {
                                     {row.getVisibleCells().map((cell) => (
                                         <td
                                             key={cell.id}
-                                            className={cn(
-                                                `border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100`,
-                                                cell.column.columnDef.meta?.className ?? '',
+                                            className={cn(`border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100`,
+                                                cell.column.columnDef.meta?.className ?? ""
                                             )}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -266,20 +277,45 @@ export default function Suppliers() {
                 </div>
             </div>
 
-            <CreateSupplier />
-            <EditSupplier />
 
-            <DeleteDialog<Supplier | null, number>
-                resource={useSupplierStore().deletingItem}
+            <CreateSalesOrder customers={customers} products={products} />
+
+            <EditSalesOrder customers={customers} products={products} />
+
+            <UpdateStatus<string>
+                title='Update Status'
+                message='are you sure to update this status ?'
+                onOpenChange={() => {
+                    stopUpdateStatus();
+                }}
+                onSubmit={useSalesOrderStore().updateStatus}
+                open={useSalesOrderStore.getState().isUpdateStatus}
+                id={updateStatusItem?.id}
+            />
+
+            {/* <UpdateStatus<string>
+                title='Update Status'
+                message='are you sure to update this status ?'
+                onOpenChange={() => {
+                    stopUpdateStatus();
+                    console.log("id", updateStatusItem)
+                }}
+                onSubmit={useSalesOrderStore().updateStatus}
+                open={useSalesOrderStore.getState().isUpdateStatus}
+                id={updateStatusItem?.id}
+            />
+
+            <DeleteDialog<SalesOrder | null, string>
+                resource={useSalesOrderStore().deletingItem}
                 id={deletingItem?.id}
-                onDelete={useSupplierStore().deleteItem}
-                open={useSupplierStore.getState().isDeleting}
+                onDelete={useSalesOrderStore().deleteItem}
+                open={useSalesOrderStore.getState().isDeleting}
                 onOpenChange={() => {
                     stopDeleting();
                 }}
-                itemName="supplier"
-                renderName={deletingItem?.name}
-            />
+                itemName="sales order"
+                renderName={String(deletingItem?.id)}
+            /> */}
         </AppLayout>
     );
 }

@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\StockItemController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -9,13 +12,11 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return redirect()->route('login');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('users')->group(function () {
         Route::get('', [UserController::class, 'index'])->name('users.index');
@@ -51,6 +52,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/store', [PurchaseOrderController::class, 'store'])->name('purchase_orders.store');
         Route::put('/update/{id}', [PurchaseOrderController::class, 'update'])->name('purchase_orders.update');
         Route::delete('/delete/{id}', [PurchaseOrderController::class, 'delete'])->name('purchase_orders.delete');
+    Route::prefix('customers')->group(function () {
+        Route::get('', [CustomerController::class, 'index'])->name('customers.index');
+        Route::post('/store', [CustomerController::class, 'store'])->name('customers.store');
+        Route::put('/update/{id}', [CustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/delete/{id}', [CustomerController::class, 'delete'])->name('customers.delete');
+    });
+
+    Route::prefix('sales-orders')->group(function () {
+        Route::get('', [SalesOrderController::class, 'index'])->name('sales_orders.index');
+        Route::post('/store', [SalesOrderController::class, 'store'])->name('sales_orders.store');
+        Route::put('/update/{id}', [SalesOrderController::class, 'update'])->name('sales_orders.update');
+        Route::delete('/delete/{id}', [SalesOrderController::class, 'delete'])->name('sales_orders.delete');
+        Route::put('/update-status/{id}', [SalesOrderController::class, 'updateStatus'])->name('sales_orders.update_status');
     });
 });
 
