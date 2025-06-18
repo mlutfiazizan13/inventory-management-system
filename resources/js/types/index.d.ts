@@ -175,3 +175,56 @@ interface PurchaseOrderItem {
   updated_at: string; // ISO date string
 }
 
+
+export interface SalesOrder {
+  id: string;
+  customer_id: number;
+  customer: Customer;
+  order_date: string;
+  sales_status: string;
+  payment_status: string;
+  total_amount: number;
+  notes: string;
+  created_by: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+
+export type EditSalesOrder = {
+  id: string,
+  customer_id: number
+  order_date: string
+  total_amount: number
+  notes: string
+  sales_order_items: EditSalesOrderItem[]
+}
+
+export type EditSalesOrderItem = {
+  product_id: number | null;
+  quantity: number;
+  price: number;
+}
+
+export interface SalesOrderItem {
+  id: string;
+  sales_order_id: string;
+  product_id: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | undefined;
+  address: string | undefined;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
