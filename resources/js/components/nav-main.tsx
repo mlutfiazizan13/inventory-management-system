@@ -3,6 +3,7 @@ import { type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { ChevronRight } from 'lucide-react';
+import { getIconByName } from '@/utils/icon-map';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
@@ -11,16 +12,17 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => {
-                    const hasChildren = item.children != null;
+                    const hasChildren = item.children?.length > 0;
                     const isChildActive = hasChildren
                         ? item.children!.some((child) => child.href === page.url)
                         : false;
+                    const Icon = getIconByName(item.icon);
                     return hasChildren ? (
                         <Collapsible key={item.title}  className="group/collapsible" defaultOpen={isChildActive}>
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton>
-                                        {item.icon && <item.icon />}
+                                        {Icon && <Icon />}
                                         <span>{item.title}</span>
                                         <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
                                     </SidebarMenuButton>
@@ -47,7 +49,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton asChild isActive={item.href === page.url} tooltip={{ children: item.title }}>
                                 <Link href={item.href!} preserveState={false} prefetch>
-                                    {item.icon && <item.icon />}
+                                    {Icon && <Icon />}
                                     <span>{item.title}</span>
                                 </Link>
                             </SidebarMenuButton>

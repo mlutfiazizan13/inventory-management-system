@@ -3,69 +3,106 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Package, Users, Users2, Warehouse } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { BarChart3, BookOpen, Boxes, Briefcase, ClipboardList, FileText, Folder, LayoutDashboard, LayoutGrid, Package, ReceiptText, Settings, ShieldCheck, ShoppingCart, Truck, Users, Users2, Warehouse } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+// const mainNavItems: NavItem[] = [
+//     {
+//         title: 'Dashboard',
+//         href: '/dashboard',
+//         icon: LayoutDashboard,
+//     },
+//     {
+//         title: 'Framework',
+//         icon: Settings,
+//         children: [
+//             {
+//                 title: 'Users',
+//                 href: '/users',
+//                 icon: Users,
+//             },
+//             {
+//                 title: 'Roles',
+//                 href: '/roles',
+//                 icon: ShieldCheck,
+//             },
+//         ],
+//     },
+//     {
+//         title: 'Inventory',
+//         icon: Boxes,
+//         children: [
+//             {
+//                 title: 'Products',
+//                 href: '/products',
+//                 icon: Package,
+//             },
+//             {
+//                 title: 'Stock Items',
+//                 href: '/stock-items',
+//                 icon: Boxes,
+//             },
+//         ],
+//     },
+//     {
+//         title: 'Supply Chain',
+//         icon: Truck,
+//         children: [
+//             {
+//                 title: 'Suppliers',
+//                 href: '/suppliers',
+//                 icon: Truck,
+//             },
+//             {
+//                 title: 'Purchase Orders',
+//                 href: '/purchase-orders',
+//                 icon: FileText,
+//             },
+//         ],
+//     },
+//     {
+//         title: 'Sales',
+//         icon: ShoppingCart,
+//         children: [
+//             {
+//                 title: 'Customer',
+//                 href: '/customers',
+//                 icon: Briefcase,
+//             },
+//             {
+//                 title: 'Sales Orders',
+//                 href: '/sales-orders',
+//                 icon: ClipboardList,
+//             },
+//         ],
+//     },
+//     {
+//         title: 'Reports',
+//         href: '/inventory-tracking',
+//         icon: BarChart3,
+//     },
+// ];
 
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Framework',
-        icon: Users,
-        children: [
-            {
-                title: 'Users',
-                href: '/users',
-                icon: Users,
-            },
-            {
-                title: 'Roles',
-                href: '/roles',
-                icon: Users2,
-            },
-        ]
-    },
-    {
-        title: 'Products',
-        href: '/products',
-        icon: Package,
-    },
-    {
-        title: 'Stock Items',
-        href: '/stock-items',
-        icon: Warehouse,
-    },
-    {
-        title: 'Suppliers',
-        href: '/suppliers',
-        icon: Warehouse,
-    },
-    {
-        title: 'Purchase Orders',
-        href: '/purchase-orders',
-        icon: Warehouse,
-    }
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+// const footerNavItems: NavItem[] = [
+//     {
+//         title: 'Repository',
+//         href: 'https://github.com/laravel/react-starter-kit',
+//         icon: Folder,
+//     },
+//     {
+//         title: 'Documentation',
+//         href: 'https://laravel.com/docs/starter-kits#react',
+//         icon: BookOpen,
+//     },
+// ];
 
 export function AppSidebar() {
+
+    const { mainNavItems } = usePage<{ mainNavItems: NavItem[] }>().props;
+
+    console.log(mainNavItems)
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -86,7 +123,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

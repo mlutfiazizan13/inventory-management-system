@@ -2,35 +2,35 @@ import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
 
 export interface Auth {
-    user: User;
+  user: User;
 }
 
 export interface BreadcrumbItem {
-    title: string;
-    href: string;
+  title: string;
+  href: string;
 }
 
 export interface NavGroup {
-    title: string;
-    items: NavItem[];
+  title: string;
+  items: NavItem[];
 }
 
 export interface NavItem {
-    title: string;
-    href?: string;
-    icon?: LucideIcon | null;
-    isActive?: boolean;
-    preserveState?: boolean;
-    children?: NavItem[];
+  title: string;
+  href?: string;
+  icon?: string;
+  isActive?: boolean;
+  preserveState?: boolean;
+  children?: NavItem[];
 }
 
 export interface SharedData {
-    name: string;
-    quote: { message: string; author: string };
-    auth: Auth;
-    ziggy: Config & { location: string };
-    sidebarOpen: boolean;
-    [key: string]: unknown;
+  name: string;
+  quote: { message: string; author: string };
+  auth: Auth;
+  ziggy: Config & { location: string };
+  sidebarOpen: boolean;
+  [key: string]: unknown;
 }
 
 interface PageProps<T = any> {
@@ -41,28 +41,28 @@ interface PageProps<T = any> {
     message?: string;
     error?: string;
   };
-  [key: string]: any; 
+  [key: string]: any;
 }
 
 export interface User {
-    id: number;
-    name: string;
-    email: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    roles?: Role[];
-    created_at: string;
-    updated_at: string;
-    // [key: string]: unknown;
+  id: number;
+  name: string;
+  email: string;
+  avatar?: string;
+  email_verified_at: string | null;
+  roles?: Role[];
+  created_at: string;
+  updated_at: string;
+  // [key: string]: unknown;
 }
 
 
 export interface CreateUser {
-    name: string;
-    email: string;
-    role_id: number;
-    password: string;
-    password_confirmation: string;
+  name: string;
+  email: string;
+  role_id: number;
+  password: string;
+  password_confirmation: string;
 }
 
 export interface Role {
@@ -71,6 +71,10 @@ export interface Role {
   status: string; // can restrict more tightly if needed
   created_at: string; // or Date, depending on your API or ORM
   updated_at: string;
+}
+
+export interface CreateRole {
+  name: string;
 }
 
 
