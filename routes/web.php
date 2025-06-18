@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\StockItemController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -42,6 +43,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/store', [SupplierController::class, 'store'])->name('suppliers.store');
         Route::put('/update/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
         Route::delete('/delete/{id}', [SupplierController::class, 'delete'])->name('suppliers.delete');
+    });
+
+
+    Route::prefix('purchase-orders')->group(function () {
+        Route::get('', [PurchaseOrderController::class, 'index'])->name('purchase_orders.index');
+        Route::post('/store', [PurchaseOrderController::class, 'store'])->name('purchase_orders.store');
+        Route::put('/update/{id}', [PurchaseOrderController::class, 'update'])->name('purchase_orders.update');
+        Route::delete('/delete/{id}', [PurchaseOrderController::class, 'delete'])->name('purchase_orders.delete');
     });
 });
 

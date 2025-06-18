@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { useAppStore } from '@/stores/useAppStore';
-import { PageProps, User, type BreadcrumbItem } from '@/types';
+import { PageProps, PurchaseOrder, Supplier, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -17,12 +17,16 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, Ellipsis, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, Ellipsis, EllipsisVertical, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import CreateUser from './components/create';
-import EditUser from './components/edit';
-import { useUserStore } from '@/stores/useUserStore';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { usePurchaseOrderStore } from '@/stores/usePurchaseOrderStore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import CreateSupplier from './components/create';
+import EditSupplier from './components/edit';
+import { cn } from '@/lib/utils';
+import CreatePurchaseOrder from './components/create';
+import EditPurchaseOrder from './components/edit';
+import { formatRupiah } from '@/utils/currency-format';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,23 +34,23 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
     {
-        title: 'Users',
-        href: '/users',
+        title: 'Purchase Orders',
+        href: '/purchase_orders',
     },
 ];
 
-export default function Users() {
-    const page = usePage<PageProps<User>>();
+export default function PurchaseOrders() {
+    const page = usePage<PageProps<PurchaseOrder>>();
 
-    const { users = [], roles = [] } = page.props;
+    const { purchase_orders = [], suppliers = [], products = [] } = page.props;
 
-    const stopDeleting = useUserStore((state) => state.stopDeleting);
+    const stopDeleting = usePurchaseOrderStore((state) => state.stopDeleting);
 
-    const { startEditing, startCreating, startDeleting, deletingItem } = useUserStore();
+    const { startEditing, startCreating, startDeleting, deletingItem } = usePurchaseOrderStore();
 
     useEffect(() => {
         // Lakukan fetch dari server saat komponen mount
-        router.reload({ only: ['users'] });
+        router.reload({ only: ['purchase_orders'] });
     }, []);
 
     const { user } = useAppStore();
@@ -55,24 +59,43 @@ export default function Users() {
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    const columnHelper = createColumnHelper<User>();
-    const columns: ColumnDef<User, any>[] = [
+    const columnHelper = createColumnHelper<PurchaseOrder>();
+    const columns: ColumnDef<PurchaseOrder, any>[] = [
         columnHelper.display({
             id: 'no',
             header: () => 'No',
+            size: 50,
             cell: (info) => info.row.index + 1,
         }),
-        columnHelper.accessor('name', {
-            header: () => 'Name',
+        columnHelper.accessor('supplier.name', {
+            header: () => 'Supplier',
             cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('email', {
-            header: () => 'Email',
-            cell: (info) => info.getValue(),
+        columnHelper.accessor('order_date', {
+            header: () => 'Order Date',
+            cell: ({ getValue }) => {
+                const date = parseISO(getValue());
+                return format(date, 'yyyy-MM-dd');
+            },
         }),
-        columnHelper.accessor('roles.name', {
-            header: () => 'Role',
-            cell: ({ row }) => row.original.roles?.at(0)?.name,
+        columnHelper.accessor('expected_date', {
+            header: () => 'Expected Date',
+            cell: ({ getValue }) => {
+                const date = parseISO(getValue());
+                return format(date, 'yyyy-MM-dd');
+            },
+        }),
+        columnHelper.accessor('total_cost', {
+            header: () => 'Total Cost',
+            cell: (info) => formatRupiah(info.getValue()),
+        }),
+        columnHelper.accessor('purchase_order_status', {
+            header: () => 'PO Status',
+            cell: (info) => (
+                <span className="capitalize">
+                    {info.getValue()}
+                </span>
+            ),
         }),
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
@@ -91,15 +114,18 @@ export default function Users() {
         columnHelper.display({
             id: 'actions',
             header: () => 'Action',
-            size:50,
+            size: 50,
             cell: ({ row }) => {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><Ellipsis/></Button>
+                            <Button variant="ghost"><Ellipsis /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
+                                <DropdownMenuItem>
+                                    Update Status
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => startEditing(row.original)}>
                                     Edit
                                 </DropdownMenuItem>
@@ -115,7 +141,7 @@ export default function Users() {
     ];
 
     const table = useReactTable({
-        data: users,
+        data: purchase_orders,
         columns,
         state: {
             sorting,
@@ -136,10 +162,10 @@ export default function Users() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Users" />
+            <Head title="Purchase Orders" />
             <div className="container mx-auto p-4">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Users</h1>
+                    <h1 className="text-2xl font-bold">Purchase Orders</h1>
 
                     <div className="flex gap-3">
                         <div className="">
@@ -190,7 +216,9 @@ export default function Users() {
                                     {row.getVisibleCells().map((cell) => (
                                         <td
                                             key={cell.id}
-                                            className="border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100"
+                                            className={cn(`border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100`,
+                                                cell.column.columnDef.meta?.className ?? ""
+                                            )}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
@@ -248,20 +276,21 @@ export default function Users() {
                 </div>
             </div>
 
-            <CreateUser roles={roles} />
 
-            <EditUser roles={roles} />
+            <CreatePurchaseOrder suppliers={suppliers} products={products} />
 
-            <DeleteDialog<User | null, number>
-                resource={useUserStore().deletingItem}
+            <EditPurchaseOrder suppliers={suppliers} products={products} />
+
+            <DeleteDialog<PurchaseOrder | null, string>
+                resource={usePurchaseOrderStore().deletingItem}
                 id={deletingItem?.id}
-                onDelete={useUserStore().deleteItem}
-                open={useUserStore.getState().isDeleting}
+                onDelete={usePurchaseOrderStore().deleteItem}
+                open={usePurchaseOrderStore.getState().isDeleting}
                 onOpenChange={() => {
                     stopDeleting();
                 }}
-                itemName="user"
-                renderName={deletingItem?.name}
+                itemName="purchase order"
+                renderName={String(deletingItem?.id)}
             />
         </AppLayout>
     );

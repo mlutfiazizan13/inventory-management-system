@@ -44,6 +44,11 @@ const mainNavItems: NavItem[] = [
         title: 'Suppliers',
         href: '/suppliers',
         icon: Warehouse,
+    },
+    {
+        title: 'Purchase Orders',
+        href: '/purchase-orders',
+        icon: Warehouse,
     }
 ];
 

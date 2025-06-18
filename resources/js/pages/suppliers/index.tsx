@@ -17,7 +17,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, EllipsisVertical, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSupplierStore } from '@/stores/useSupplierStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -110,7 +110,7 @@ export default function Suppliers() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><EllipsisVertical /></Button>
+                            <Button variant="ghost"><Ellipsis/></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
