@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { useAppStore } from '@/stores/useAppStore';
-import { PageProps, PurchaseOrder, Supplier, type BreadcrumbItem } from '@/types';
+import { PageProps, Role, User, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -17,17 +17,12 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, Ellipsis, EllipsisVertical, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Edit, Ellipsis, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { usePurchaseOrderStore } from '@/stores/usePurchaseOrderStore';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import CreateSupplier from './components/create';
-import EditSupplier from './components/edit';
-import { cn } from '@/lib/utils';
-import CreatePurchaseOrder from './components/create';
-import EditPurchaseOrder from './components/edit';
-import { formatRupiah } from '@/utils/currency-format';
-import UpdateStatus from './components/update-status';
+import { useRoleStore } from '@/stores/useRoleStore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import CreateRole from './components/create';
+import EditRole from './components/edit';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,113 +30,73 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
     {
-        title: 'Purchase Orders',
-        href: '/purchase_orders',
+        title: 'Roles',
+        href: '/roles',
     },
 ];
 
-export default function PurchaseOrders() {
-    const page = usePage<PageProps<PurchaseOrder>>();
+export default function Roles() {
+    const page = usePage<PageProps<Role>>();
 
-    const { data, purchase_orders = [], suppliers = [], products = [] } = page.props;
+    const { roles = [] } = page.props;
 
-    const stopDeleting = usePurchaseOrderStore((state) => state.stopDeleting);
-    const stopUpdateStatus = usePurchaseOrderStore((state) => state.stopUpdateStatus);
+    const stopDeleting = useRoleStore((state) => state.stopDeleting);
 
-
-    const { startEditing, startCreating, startDeleting, deletingItem, startUpdateStatus, updateStatusItem } = usePurchaseOrderStore();
+    const { startEditing, startCreating, startDeleting, deletingItem } = useRoleStore();
 
     useEffect(() => {
         // Lakukan fetch dari server saat komponen mount
-        router.reload({ only: ['purchase_orders'] });
+        router.reload({ only: ['roles'] });
     }, []);
-
-    const { user } = useAppStore();
 
     const [sorting, setSorting] = useState<SortingState>([]);
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    const columnHelper = createColumnHelper<PurchaseOrder>();
-    const columns: ColumnDef<PurchaseOrder, any>[] = [
+    const columnHelper = createColumnHelper<Role>();
+    const columns: ColumnDef<Role, any>[] = [
         columnHelper.display({
             id: 'no',
             header: () => 'No',
-            size: 50,
             cell: (info) => info.row.index + 1,
         }),
-        columnHelper.accessor('supplier.name', {
-            header: () => 'Supplier',
+        columnHelper.accessor('name', {
+            header: () => 'Name',
             cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('order_date', {
-            header: () => 'Order Date',
-            cell: ({ getValue }) => {
-                const date = parseISO(getValue());
-                return format(date, 'yyyy-MM-dd');
-            },
-        }),
-        columnHelper.accessor('expected_date', {
-            header: () => 'Expected Date',
-            cell: ({ getValue }) => {
-                const date = parseISO(getValue());
-                return format(date, 'yyyy-MM-dd');
-            },
-        }),
-        columnHelper.accessor('total_cost', {
-            header: () => 'Total Cost',
-            cell: (info) => formatRupiah(info.getValue()),
-        }),
-        columnHelper.accessor('purchase_order_status', {
-            header: () => 'PO Status',
-            cell: (info) => (
-                <span className="capitalize">
-                    {info.getValue()}
-                </span>
-            ),
         }),
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-'; // or return null, '' or 'N/A'
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
         columnHelper.accessor('updated_at', {
             header: () => 'Updated At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-';
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
         columnHelper.display({
             id: 'actions',
             header: () => 'Action',
-            size: 50,
+            size:50,
             cell: ({ row }) => {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><Ellipsis /></Button>
+                            <Button variant="ghost"><Ellipsis/></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
-                                <DropdownMenuItem>
-                                    Show Items
+                                <DropdownMenuItem onClick={() => startEditing(row.original)}>
+                                    Edit
                                 </DropdownMenuItem>
-
-                                {row.original.purchase_order_status !== 'received' &&
-                                    <DropdownMenuItem onClick={() => startUpdateStatus(row.original)}>
-                                        Update Status
-                                    </DropdownMenuItem>
-                                }
-
-                                {row.original.purchase_order_status == 'draft' &&
-                                    <DropdownMenuItem onClick={() => startEditing(row.original)}>
-                                        Edit
-                                    </DropdownMenuItem>
-                                }
-
                                 <DropdownMenuItem className='text-destructive' onClick={() => startDeleting(row.original)}>
                                     Delete
                                 </DropdownMenuItem>
@@ -154,7 +109,7 @@ export default function PurchaseOrders() {
     ];
 
     const table = useReactTable({
-        data: purchase_orders,
+        data: roles,
         columns,
         state: {
             sorting,
@@ -175,10 +130,10 @@ export default function PurchaseOrders() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Purchase Orders" />
+            <Head title="Roles" />
             <div className="container mx-auto p-4">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Purchase Orders</h1>
+                    <h1 className="text-2xl font-bold">Roles</h1>
 
                     <div className="flex gap-3">
                         <div className="">
@@ -229,9 +184,7 @@ export default function PurchaseOrders() {
                                     {row.getVisibleCells().map((cell) => (
                                         <td
                                             key={cell.id}
-                                            className={cn(`border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100`,
-                                                cell.column.columnDef.meta?.className ?? ""
-                                            )}
+                                            className="border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100"
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
@@ -289,30 +242,20 @@ export default function PurchaseOrders() {
                 </div>
             </div>
 
+            <CreateRole />
 
-            <CreatePurchaseOrder suppliers={suppliers} products={products} />
+            <EditRole />
 
-            <EditPurchaseOrder suppliers={suppliers} products={products} />
-
-            <UpdateStatus<string>
-                title='Update Status'
-                message='are you sure to update this status ?'
-                onOpenChange={() => stopUpdateStatus()}
-                onSubmit={usePurchaseOrderStore().updateStatus}
-                open={usePurchaseOrderStore.getState().isUpdateStatus}
-                id={updateStatusItem?.id}
-            />
-
-            <DeleteDialog<PurchaseOrder | null, string>
-                resource={usePurchaseOrderStore().deletingItem}
+            <DeleteDialog<Role | null, number>
+                resource={useRoleStore().deletingItem}
                 id={deletingItem?.id}
-                onDelete={usePurchaseOrderStore().deleteItem}
-                open={usePurchaseOrderStore.getState().isDeleting}
+                onDelete={useRoleStore().deleteItem}
+                open={useRoleStore.getState().isDeleting}
                 onOpenChange={() => {
                     stopDeleting();
                 }}
-                itemName="purchase order"
-                renderName={String(deletingItem?.id)}
+                itemName="role"
+                renderName={deletingItem?.name}
             />
         </AppLayout>
     );

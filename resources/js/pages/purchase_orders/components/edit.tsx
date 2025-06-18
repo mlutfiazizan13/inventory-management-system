@@ -14,16 +14,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronsUpDown, Plus, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatRupiah } from '@/utils/currency-format';
+import { format } from 'date-fns';
 
 
 export default function EditPurchaseOrder({ suppliers, products }: { suppliers: Supplier[], products: Product[] }) {
     const isEditing = usePurchaseOrderStore((state) => state.isEditing);
     const editingItem = usePurchaseOrderStore((state) => state.editingItem);
     const stopEditing = usePurchaseOrderStore((state) => state.stopEditing);
-
-    console.log(editingItem);
+    const updateItem = usePurchaseOrderStore((state) => state.updateItem);
 
     const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<EditPurchaseOrderType>({
+        id: editingItem?.id ?? 0,
         supplier_id: editingItem?.supplier_id ?? 0,
         order_date: editingItem?.order_date ?? '',
         expected_date: editingItem?.expected_date ?? '',
@@ -31,8 +32,6 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
         notes: editingItem?.notes ?? '',
         purchase_order_items: editingItem?.purchase_order_items ?? [],
     })
-
-    console.log(data);
 
     const [editingIndex, setEditingIndex] = useState(null);
 
@@ -67,7 +66,7 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
     const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
         try {
-            // await updateItem(data);
+            await updateItem(data.id, data);
             reset(); // optional: reset form
         } catch (errs) {
             setError(errs as Record<keyof PurchaseOrder, string>);
@@ -86,25 +85,40 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
         }, 0);
         setData((current) => ({
             ...current,
-            total_amount: totalCost,
+            total_cost: totalCost,
         }));
     }, [data.purchase_order_items]);
 
+
+    useEffect(() => {
+        if (editingItem) {
+            setData({
+                id: editingItem.id,
+                supplier_id: editingItem.supplier_id,
+                order_date: editingItem.order_date,
+                expected_date: editingItem.expected_date,
+                total_cost: Number(editingItem.total_cost),
+                notes: editingItem.notes ?? '',
+                purchase_order_items: editingItem.purchase_order_items ?? [],
+            });
+        }
+    }, [editingItem]);
+
     return (
         <FormDialog
-            title="Create Purchase Order"
+            title="Edit Purchase Order"
             onSubmit={handleSubmit}
             onCancel={closeModal}
-            submitText="Create"
+            submitText="Edit"
             processing={processing}
             open={usePurchaseOrderStore().isEditing}
             onOpenChange={usePurchaseOrderStore((state) => state.stopEditing)}
-            className='min-w-xl'
+            className='min-w-2xl'
         >
             <div className="grid gap-2">
                 <Label htmlFor="supplier_id">Supplier</Label>
 
-                <Select name="supplier_id" value={String(data.supplier_id)} onValueChange={(value) => setData('supplier_id', Number.parseInt(value))}>
+                <Select name="supplier_id" value={data.supplier_id.toString()} onValueChange={(value) => setData('supplier_id', Number.parseInt(value))}>
                     <SelectTrigger>
                         <SelectValue id="supplier_id" placeholder="Select Supplier..." />
                     </SelectTrigger>
@@ -132,6 +146,7 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
                     type="date"
                     name="order_date"
                     onChange={(e) => setData('order_date', e.target.value)}
+                    value={data.order_date ? format( data.order_date,"yyyy-MM-dd") : undefined}
                     placeholder="Order Date"
                     autoComplete="current-order_date"
                 />
@@ -147,6 +162,7 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
                     type="date"
                     name="expected_date"
                     onChange={(e) => setData('expected_date', e.target.value)}
+                    value={data.expected_date ? format( data.expected_date,"yyyy-MM-dd") : undefined}
                     placeholder="Order Date"
                     autoComplete="current-expected_date"
                 />
@@ -179,9 +195,8 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
                                             value={String(data.purchase_order_items[index].product_id)}
                                             onValueChange={(value) => {
                                                 const product = products.find(p => p.id === parseInt(value));
-                                                console.log("product_id : " + product!.id);
-                                                updateItem(index, 'product_id', product!.id)
-                                                updateItem(index, 'unit_price', product?.price ?? 0)
+                                                updatePOItem(index, 'product_id', product!.id)
+                                                updatePOItem(index, 'unit_price', product?.price ?? 0)
                                             }}>
                                             <SelectTrigger>
                                                 <SelectValue id="product_id" placeholder="Select Product..." />
@@ -206,7 +221,7 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
                                             type="number"
                                             placeholder="Quantity"
                                             value={data.purchase_order_items[index].quantity}
-                                            onChange={e => updateItem(index, 'quantity', parseInt(e.target.value))}
+                                            onChange={e => updatePOItem(index, 'quantity', parseInt(e.target.value))}
                                         />
                                         <InputError message={errors.purchase_order_items} />
                                     </div>
@@ -227,7 +242,7 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
                                             onBlur={() => setEditingIndex(null)}
                                             onChange={(e) => {
                                                 const parsed = parseFloat(e.target.value.replace(/[^\d.-]/g, ''));
-                                                updateItem(index, "unit_price", isNaN(parsed) ? 0 : parsed);
+                                                updatePOItem(index, "unit_price", isNaN(parsed) ? 0 : parsed);
                                             }}
                                         />
                                         <InputError message={errors.purchase_order_items} />
@@ -266,8 +281,7 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
                 <CollapsibleContent className="flex flex-col gap-2">
                     {data.purchase_order_items.map((item, index) => {
                         const product = products.find(p => p.id === item.product_id);
-                        console.log(item.product_id);
-
+                        
                         return <div key={`product-summary-${index}`} className='flex justify-between'>
                             <p className='font-bold'>{product?.name}</p>
                             <div className='text-end'>
@@ -276,7 +290,11 @@ export default function EditPurchaseOrder({ suppliers, products }: { suppliers: 
                             </div>
                         </div>
                     })}
-                    <p>Total Cost : {data.total_cost}</p>
+                    <hr />
+                    <div className='flex justify-between font-bold'>
+                        <p>Total Cost</p>
+                        <p>{formatRupiah(data.total_cost)}</p>
+                    </div>
                 </CollapsibleContent>
             </Collapsible>
         </FormDialog>

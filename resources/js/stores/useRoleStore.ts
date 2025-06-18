@@ -1,43 +1,37 @@
-import { EditPurchaseOrder, PurchaseOrder } from '@/types';
+import { CreateRole, Role } from '@/types';
 import { router } from '@inertiajs/react';
 import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
 
-interface PurchaseOrderState<T, C, E> {
+interface RoleState<T, C> {
     items: T[];
 
     setItems: (items: T[]) => void;
     // UI state
     isCreating: boolean;
     isEditing: boolean;
-    editingItem: E | null;
+    editingItem: T | null;
     isDeleting: boolean;
     deletingItem: T | null;
-    isUpdateStatus: boolean,
-    updateStatusItem: T | null;
 
     // UI actions
     startCreating: () => void;
     stopCreating: () => void;
-    startEditing: (item: E) => void;
+    startEditing: (item: T) => void;
     stopEditing: () => void;
     startDeleting: (item: T) => void;
     stopDeleting: () => void;
 
-    startUpdateStatus: (item: T) => void;
-    stopUpdateStatus: () => void;
-
     // Server actions (using Inertia)
     fetchItems: (params?: Record<string, any>) => void;
     reloadItems: (params?: Record<string, any>) => void;
-    createItem: (data: C) => Promise<void>;
-    updateItem: (id: number | string, data: Partial<T>) => Promise<void>;
-    deleteItem: (id: number | string) => Promise<void>;
-    updateStatus: (id: number | string) => Promise<void>;
+    createItem: (data: Omit<C, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+    updateItem: (id: number, data: Partial<T>) => Promise<void>;
+    deleteItem: (id: number) => Promise<void>;
     // bulkDelete: (ids: number[]) => Promise<void>;
 }
 
-export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, PurchaseOrder, EditPurchaseOrder>>((set, get) => ({
+export const useRoleStore = create<RoleState<Role, CreateRole>>((set, get) => ({
     items: [],
     setItems: (items) => set({ items: items }),
 
@@ -46,9 +40,6 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
     editingItem: null,
     isDeleting: false,
     deletingItem: null,
-
-    isUpdateStatus: false,
-    updateStatusItem: null,
 
     // UI state management
     startCreating: () => set({ isCreating: true }),
@@ -66,7 +57,7 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
             editingItem: null,
         }),
 
-    startDeleting: (item: PurchaseOrder) =>
+    startDeleting: (item: Role) =>
         set({
             isDeleting: true,
             deletingItem: item,
@@ -77,21 +68,10 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
             deletingItem: null,
         }),
 
-    startUpdateStatus: (item: PurchaseOrder) =>
-        set({
-            isUpdateStatus: true,
-            updateStatusItem: item,
-        }),
-    stopUpdateStatus: () =>
-        set({
-            isUpdateStatus: false,
-            updateStatusItem: null,
-        }),
-
     // Server operations using Inertia
     fetchItems: (params = {}) => {
         router.get(
-            route('purchase_orders.index'),
+            route('roles.index'),
             {
                 ...params,
             },
@@ -103,16 +83,18 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
     },
 
     reloadItems: (params = {}) => {
-        router.reload({ only: ['purchase_orders'] });
+        router.reload({ only: ['roles'] });
     },
 
     createItem: async (data) => {
         return new Promise((resolve, reject) => {
-            router.post(route('purchase_orders.store'), data, {
+            router.post(route('roles.store'), data as any, {
+                preserveState: false,
                 preserveScroll: true,
                 onSuccess: (page) => {
                     get().stopCreating();
                     useAppStore.getState().addNotification('Item created successfully!', 'success');
+                    get().reloadItems();
                     resolve();
                 },
                 onError: (errors) => {
@@ -125,11 +107,12 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
 
     updateItem: async (id, data) => {
         return new Promise((resolve, reject) => {
-            router.put(route('purchase_orders.update', id), data, {
+            router.put(route('roles.update', id), data as any, {
                 preserveScroll: true,
                 onSuccess: () => {
                     get().stopEditing();
                     useAppStore.getState().addNotification('Item updated successfully!', 'success');
+                    get().reloadItems();
                 },
                 onError: (errors) => {
                     useAppStore.getState().addNotification('Failed to update item', 'error');
@@ -140,7 +123,8 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
     },
 
     deleteItem: async (id) => {
-        await router.delete(route('purchase_orders.delete', id), {
+        await router.delete(route('roles.delete', id), {
+            preserveState: false, // force reload fresh data
             preserveScroll: false,
             onSuccess: () => {
                 useAppStore.getState().addNotification('Item deleted successfully!', 'success');
@@ -150,40 +134,5 @@ export const usePurchaseOrderStore = create<PurchaseOrderState<PurchaseOrder, Pu
                 throw errors;
             },
         });
-    },
-
-    updateStatus: async (id) => {
-        return new Promise((resolve, reject) => {
-            router.put(route('purchase_orders.update_status', id), {}, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    get().stopUpdateStatus();
-                    useAppStore.getState().addNotification('Purchase Order status updated successfully!', 'success');
-                },
-                onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to update item', 'error');
-                    reject(errors);
-                },
-            });
-        });
-    },
-
-    // bulkDelete: async (ids) => {
-    //     return new Promise((resolve, reject) => {
-    //         router.delete(route('purchase_orders.bulk-destroy'), {
-    //             data: { ids },
-    //             preserveScroll: true,
-    //             onSuccess: () => {
-    //                 ids.forEach((id) => get().removeItem(id));
-    //                 get().clearSelection();
-    //                 useAppStore.getState().addNotification(`${ids.length} items deleted successfully!`, 'success');
-    //                 resolve();
-    //             },
-    //             onError: (errors) => {
-    //                 useAppStore.getState().addNotification('Failed to delete items', 'error');
-    //                 reject(errors);
-    //             },
-    //         });
-    //     });
-    // },
+    }
 }));

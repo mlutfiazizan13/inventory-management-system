@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('menus', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->string('name');
-            $table->string('status');
+            $table->string('parent_id');
+            $table->string('action');
+            $table->string('type');
+            $table->string('description');
+            $table->string('url');
+            $table->string('icon');
+            $table->integer('order');
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }
