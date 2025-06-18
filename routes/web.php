@@ -4,6 +4,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\StockItemController;
 use App\Http\Controllers\SupplierController;
@@ -23,6 +24,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/store', [UserController::class, 'store'])->name('users.store');
         Route::put('/update/{id}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/delete/{id}', [UserController::class, 'delete'])->name('users.delete');
+    });
+
+    Route::prefix('roles')->group(function () {
+        Route::get('', [RoleController::class, 'index'])->name('roles.index');
+        Route::post('/store', [RoleController::class, 'store'])->name('roles.store');
+        Route::put('/update/{id}', [RoleController::class, 'update'])->name('roles.update');
+        Route::delete('/delete/{id}', [RoleController::class, 'delete'])->name('roles.delete');
     });
 
     Route::prefix('products')->group(function () {
@@ -52,6 +60,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/store', [PurchaseOrderController::class, 'store'])->name('purchase_orders.store');
         Route::put('/update/{id}', [PurchaseOrderController::class, 'update'])->name('purchase_orders.update');
         Route::delete('/delete/{id}', [PurchaseOrderController::class, 'delete'])->name('purchase_orders.delete');
+    });
+
     Route::prefix('customers')->group(function () {
         Route::get('', [CustomerController::class, 'index'])->name('customers.index');
         Route::post('/store', [CustomerController::class, 'store'])->name('customers.store');

@@ -42,7 +42,6 @@ export default function EditUser({ roles }: { roles: Role[] }) {
             await updateItem(data.id, data);
             reset(); // optional: reset form
         } catch (errs) {
-            console.log(errs);
             setError(errs as Record<keyof EditUserType, string>);
         }
     };

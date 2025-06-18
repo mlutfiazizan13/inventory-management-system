@@ -77,14 +77,18 @@ export default function Users() {
         columnHelper.accessor('created_at', {
             header: () => 'Created At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-'; // or return null, '' or 'N/A'
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
         columnHelper.accessor('updated_at', {
             header: () => 'Updated At',
             cell: ({ getValue }) => {
-                const date = parseISO(getValue());
+                const value = getValue();
+                if (!value) return '-';
+                const date = parseISO(value);
                 return format(date, 'yyyy-MM-dd HH:mm:ss');
             },
         }),
