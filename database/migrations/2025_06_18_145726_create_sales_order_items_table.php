@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('menus', function (Blueprint $table) {
+        Schema::create('sales_order_items', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->string('parent_id');
-            $table->string('action');
-            $table->string('type');
-            $table->string('description');
-            $table->string('url');
-            $table->string('icon');
-            $table->integer('order');
-            $table->string('status')->default('active');
+            $table->string('sales_order_id');
+            $table->string('product_id');
+            $table->bigInteger('quantity');
+            $table->decimal('price', 20, 2); 
+            $table->decimal('subtotal', 20, 2); 
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('menus');
+        Schema::dropIfExists('sales_order_items');
     }
 };

@@ -1,12 +1,8 @@
 import DeleteDialog from '@/components/modals/DeleteDialog';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
-import { cn } from '@/lib/utils';
-import { useAppStore } from '@/stores/useAppStore';
-import { useSupplierStore } from '@/stores/useSupplierStore';
-import { PageProps, Supplier, type BreadcrumbItem } from '@/types';
+import { Customer, PageProps, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -20,10 +16,13 @@ import {
     useReactTable,
 } from '@tanstack/react-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Ellipsis, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, ChevronUp, Edit, Ellipsis, EllipsisVertical, RefreshCw, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import CreateSupplier from './components/create';
-import EditSupplier from './components/edit';
+import { useCustomerStore } from '@/stores/useCustomerStore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import CreateCustomer from './components/create';
+import EditCustomer from './components/edit';
+import { useAppStore } from '@/stores/useAppStore';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,45 +30,38 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
     {
-        title: 'Suppliers',
-        href: '/suppliers',
+        title: 'Customers',
+        href: '/customers',
     },
 ];
 
-export default function Suppliers() {
-    const page = usePage<PageProps<Supplier>>();
+export default function Roles() {
+    const page = usePage<PageProps<Customer>>();
 
-    const { suppliers = [] } = page.props;
+    const { customers = [] } = page.props;
 
-    const stopDeleting = useSupplierStore((state) => state.stopDeleting);
+    const stopDeleting = useCustomerStore((state) => state.stopDeleting);
 
-    const { startEditing, startCreating, startDeleting, deletingItem } = useSupplierStore();
+    const { startEditing, startCreating, startDeleting, deletingItem } = useCustomerStore();
 
     useEffect(() => {
         // Lakukan fetch dari server saat komponen mount
-        router.reload({ only: ['suppliers'] });
+        router.reload({ only: ['customers'] });
     }, []);
-
-    const { user } = useAppStore();
 
     const [sorting, setSorting] = useState<SortingState>([]);
 
     const [globalFilter, setGlobalFilter] = useState('');
 
-    const columnHelper = createColumnHelper<Supplier>();
-    const columns: ColumnDef<Supplier, any>[] = [
+    const columnHelper = createColumnHelper<Customer>();
+    const columns: ColumnDef<Customer, any>[] = [
         columnHelper.display({
             id: 'no',
             header: () => 'No',
-            size: 50,
             cell: (info) => info.row.index + 1,
         }),
         columnHelper.accessor('name', {
             header: () => 'Name',
-            cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('contact_name', {
-            header: () => 'Contact Name',
             cell: (info) => info.getValue(),
         }),
         columnHelper.accessor('email', {
@@ -82,9 +74,6 @@ export default function Suppliers() {
         }),
         columnHelper.accessor('address', {
             header: () => 'Address',
-            meta: {
-                className: 'text-wrap',
-            },
             cell: (info) => info.getValue(),
         }),
         columnHelper.accessor('created_at', {
@@ -113,12 +102,14 @@ export default function Suppliers() {
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className='w-full'>
-                            <Button variant="ghost"><Ellipsis/></Button>
+                            <Button variant="ghost"><Ellipsis /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="start">
                             <DropdownMenuGroup>
-                                <DropdownMenuItem onClick={() => startEditing(row.original)}>Edit</DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive" onClick={() => startDeleting(row.original)}>
+                                <DropdownMenuItem onClick={() => startEditing(row.original)}>
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className='text-destructive' onClick={() => startDeleting(row.original)}>
                                     Delete
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
@@ -130,7 +121,7 @@ export default function Suppliers() {
     ];
 
     const table = useReactTable({
-        data: suppliers,
+        data: customers,
         columns,
         state: {
             sorting,
@@ -151,10 +142,10 @@ export default function Suppliers() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Suppliers" />
+            <Head title="Customers" />
             <div className="container mx-auto p-4">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Suppliers</h1>
+                    <h1 className="text-2xl font-bold">Customers</h1>
 
                     <div className="flex gap-3">
                         <div className="">
@@ -183,7 +174,7 @@ export default function Suppliers() {
                                     {headerGroup.headers.map((header) => (
                                         <th
                                             key={header.id}
-                                            className="dark:bg-primary-foreground border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:text-gray-100"
+                                            className="border border-gray-200 bg-black px-4 py-2 text-nowrap text-white dark:border-gray-700 dark:bg-primary-foreground dark:text-gray-100"
                                             onClick={header.column.getToggleSortingHandler()}
                                             style={{ width: header.getSize() }}
                                         >
@@ -205,10 +196,7 @@ export default function Suppliers() {
                                     {row.getVisibleCells().map((cell) => (
                                         <td
                                             key={cell.id}
-                                            className={cn(
-                                                `border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100`,
-                                                cell.column.columnDef.meta?.className ?? '',
-                                            )}
+                                            className="border border-gray-200 px-4 py-2 text-nowrap text-gray-900 dark:border-gray-700 dark:text-gray-100"
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
@@ -266,18 +254,19 @@ export default function Suppliers() {
                 </div>
             </div>
 
-            <CreateSupplier />
-            <EditSupplier />
+            <CreateCustomer />
 
-            <DeleteDialog<Supplier | null, number>
-                resource={useSupplierStore().deletingItem}
+            <EditCustomer />
+
+            <DeleteDialog<Customer | null, number>
+                resource={useCustomerStore().deletingItem}
                 id={deletingItem?.id}
-                onDelete={useSupplierStore().deleteItem}
-                open={useSupplierStore.getState().isDeleting}
+                onDelete={useCustomerStore().deleteItem}
+                open={useCustomerStore.getState().isDeleting}
                 onOpenChange={() => {
                     stopDeleting();
                 }}
-                itemName="supplier"
+                itemName="customer"
                 renderName={deletingItem?.name}
             />
         </AppLayout>
