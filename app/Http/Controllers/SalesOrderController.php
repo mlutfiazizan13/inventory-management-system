@@ -7,18 +7,29 @@ use App\Models\Product;
 use App\Models\Customer;
 use App\Models\SalesOrder;
 use App\Models\SalesOrderItem;
+use App\Models\StockItem;
+use App\Services\StockAdjustmentService;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SalesOrderController extends Controller
 {
+
+    private StockAdjustmentService $stockMovementService;
+
+    public function __construct(StockAdjustmentService $stockMovementService)
+    {
+        $this->stockMovementService = $stockMovementService;
+    }
+
     public function index()
     {
         $sales_orders = SalesOrder::with('Customer', 'SalesOrderItems')->where('status', 'active')->get();
         $customers = Customer::where('status', 'active')->get();
-        $products = Product::where('status', 'active')->get();
+        $products = Product::with('inventory')->where('status', 'active')->get();
 
         return Inertia::render("sales_orders/index", [
             "sales_orders" => $sales_orders,
@@ -176,6 +187,23 @@ class SalesOrderController extends Controller
 
         // Determine next status
         $next_status = $workflow_status[$current_index + 1];
+
+        // Custom business logic from "pending" → "confirmed"
+        if ($current_status === 'pending' && $next_status === 'confirmed') {
+            $sales_order_items = SalesOrderItem::where('sales_order_id', $id)->get();
+
+            foreach ($sales_order_items as $item) {
+                $stock_item = StockItem::where('product_id', $item->product_id)->first();
+
+                $this->stockMovementService->decrease(
+                    $stock_item->product_id,
+                    $item->quantity
+                );
+            }
+
+
+            Log::info("Processing special logic for pending → confirmed for SalesOrder ID: {$sales_order->id}");
+        }
 
         // Update the status
         $sales_order->sales_status = $next_status;

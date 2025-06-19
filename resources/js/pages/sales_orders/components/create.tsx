@@ -29,6 +29,7 @@ type CreateSalesOrder = {
 }
 
 export default function CreateSalesOrder({ customers, products }: { customers: Customers[], products: Product[] }) {
+    console.log(products);
 
     const { data, setData, processing, reset, errors, setError, clearErrors } = useForm<CreateSalesOrder>({
         customer_id: 0,
@@ -77,6 +78,21 @@ export default function CreateSalesOrder({ customers, products }: { customers: C
 
     const handleSubmit: FormEventHandler = async (e) => {
         e.preventDefault();
+
+        let hasStockError = false;
+
+        // Check stock sufficiency
+        data.sales_order_items.forEach((item, index) => {
+            const product = products.find(p => p.id === item.product_id);
+            if (product && item.quantity > product.inventory?.quantity) {
+                setError(`sales_order_items.${index}.quantity`, `Only ${product.inventory?.quantity} in stock`);
+                hasStockError = true;
+            }
+        });
+
+        console.log(errors);
+        if (hasStockError) return;
+
         try {
             await createItem(data);
             reset(); // optional: reset form
@@ -166,8 +182,11 @@ export default function CreateSalesOrder({ customers, products }: { customers: C
                     </div>
 
                     <CollapsibleContent className="flex flex-col gap-2">
-                        {data.sales_order_items.map((item, index) => (
-                            <div key={`product-${index}`} className='flex justify-between gap-3'>
+                        {data.sales_order_items.map((item, index) => {
+                            const product = products.find(p => p.id === item.product_id);
+                            const maxStock = product?.stock ?? Infinity;
+
+                            return <div key={`product-${index}`} className='flex justify-between gap-3'>
                                 <div className='grid grid-cols-3 w-full gap-3'>
                                     <div className="grid gap-2">
                                         <Select
@@ -192,7 +211,7 @@ export default function CreateSalesOrder({ customers, products }: { customers: C
                                             </SelectContent>
                                         </Select>
 
-                                        <InputError message={errors['sales_order_items.'+index+'.product_id']} />
+                                        <InputError message={errors['sales_order_items.' + index + '.product_id']} />
                                     </div>
 
 
@@ -201,10 +220,11 @@ export default function CreateSalesOrder({ customers, products }: { customers: C
                                             type="number"
                                             name='quantity'
                                             placeholder="Quantity"
+                                            max={maxStock}
                                             value={data.sales_order_items[index].quantity}
                                             onChange={e => updateItem(index, 'quantity', parseInt(e.target.value))}
                                         />
-                                        <InputError message={errors['sales_order_items.'+index+'.product_id']}  />
+                                        <InputError message={errors['sales_order_items.' + index + '.quantity']} />
                                     </div>
 
 
@@ -226,7 +246,7 @@ export default function CreateSalesOrder({ customers, products }: { customers: C
                                                 updateItem(index, "price", isNaN(parsed) ? 0 : parsed);
                                             }}
                                         />
-                                        <InputError message={errors['sales_order_items.'+index+'.price']} />
+                                        <InputError message={errors['sales_order_items.' + index + '.price']} />
                                     </div>
                                 </div>
                                 {index > 0 ?
@@ -241,7 +261,7 @@ export default function CreateSalesOrder({ customers, products }: { customers: C
                                     </Button>
                                 }
                             </div>
-                        ))}
+                        })}
                     </CollapsibleContent>
                 </Collapsible>
             </div>
