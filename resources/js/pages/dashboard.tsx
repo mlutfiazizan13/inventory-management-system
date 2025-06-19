@@ -222,7 +222,7 @@ export default function Dashboard() {
                 </div>
                 <div className="grid auto-rows-min gap-4 md:grid-cols-2">
                     <div className='p-6 border-sidebar-border/70 dark:border-sidebar-border relative overflow-hidden rounded-xl border'>
-                        <p className='mb-4 text-xl font-medium'>Ongoing Purchase Order</p>
+                        <p className='mb-4 text-xl font-medium'>Monthly Total Purchases</p>
 
                         <Line
                             data={{
