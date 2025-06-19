@@ -43,7 +43,7 @@ class ProductSeeder extends Seeder
                 'brand_id' => 'PUM',
                 'currency' => 'IDR',
                 'price' => 1200000,
-                'status' => 'inactive',
+                'status' => 'active',
             ],
             [
                 'name' => 'Reebok Classic',
@@ -113,7 +113,7 @@ class ProductSeeder extends Seeder
                 'brand_id' => 'PUM',
                 'currency' => 'IDR',
                 'price' => 1000000,
-                'status' => 'inactive',
+                'status' => 'active',
             ]
         ];
 

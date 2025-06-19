@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Menu;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -451,6 +452,83 @@ class MenuSeeder extends Seeder
         foreach ($menus as $menu) {
             DB::table('role_menus')->insert([
                 'role_id' => 1,
+                'menu_id' => $menu['id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $imMenu = Menu::whereIn(
+            'id',
+            [
+                'INVENTORY',
+                'PRODUCTS',
+                'PRODUCT_CREATE',
+                'PRODUCT_DELETE',
+                'PRODUCT_UPDATE',
+                'STOCK_ITEMS',
+                'STOCK_CREATE',
+                'STOCK_UPDATE',
+                'STOCK_DELETE',
+                'SUPPLY_CHAIN',
+                'PURCHASE_ORDERS',
+                'PURCHASE_CREATE',
+                'PURCHASE_UPDATE',
+                'PURCHASE_DELETE',
+                'REPORTS'
+            ]
+        )->get();
+
+        foreach ($imMenu as $menu) {
+            DB::table('role_menus')->insert([
+                'role_id' => 2,
+                'menu_id' => $menu['id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+
+        $salesMenu = Menu::whereIn(
+            'id',
+            [
+                'SALES',
+                'CUSTOMERS',
+                'CUSTOMER_CREATE',
+                'CUSTOMER_UPDATE',
+                'SALES_ORDERS',
+                'SALES_CREATE',
+                'SALES_UPDATE',
+                'REPORTS'
+            ]
+        )->get();
+
+        foreach ($salesMenu as $menu) {
+            DB::table('role_menus')->insert([
+                'role_id' => 4,
+                'menu_id' => $menu['id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $psMenu = Menu::whereIn(
+            'id',
+            [
+                'SUPPLY_CHAIN',
+                'SUPPLIERS',
+                'SUPPLIER_CREATE',
+                'SUPPLIER_UPDATE',
+                'PURCHASE_ORDERS',
+                'PURCHASE_CREATE',
+                'PURCHASE_UPDATE',
+                'REPORTS'
+            ]
+        )->get();
+
+        foreach ($psMenu as $menu) {
+            DB::table('role_menus')->insert([
+                'role_id' => 5,
                 'menu_id' => $menu['id'],
                 'created_at' => now(),
                 'updated_at' => now(),
