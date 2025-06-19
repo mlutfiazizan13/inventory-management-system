@@ -143,11 +143,7 @@ class PurchaseOrderController extends Controller
         $purchase_order->status = 'inactive';
         $purchase_order->save();
 
-        $purchase_order_items = PurchaseOrderItem::where('purchase_order_id', $id)->get();
-        foreach ($purchase_order_items as $item) {
-            $item->status = 'inactive';
-        }
-        $purchase_order_items->save();
+        PurchaseOrderItem::where('purchase_order_id', $id)->update(['status' => 'inactive']);
         DB::commit();
         return redirect()->back()->with('success', 'Purchase Order deleted successfully');
     }

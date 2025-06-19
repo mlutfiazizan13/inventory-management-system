@@ -14,20 +14,16 @@ interface DialogProps<ID> {
 }
 
 export default function UpdateStatus<ID>({ title, message, id, onSubmit, open, onOpenChange }: DialogProps<ID>) {
-    const [processing, setProcessing] = useState(false);
+    
 
     const handleSubmit = async () => {
         if (!id) return;
 
-        setProcessing(true);
         try {
             await onSubmit(id);
         } finally {
-            setProcessing(false);
-
             onOpenChange(false);
         }
-        setProcessing(false);
     };
 
     const closeModal = () => {
@@ -44,7 +40,7 @@ export default function UpdateStatus<ID>({ title, message, id, onSubmit, open, o
                     <Button variant="secondary" onClick={closeModal}>
                         Cancel
                     </Button>
-                    <Button variant="default" disabled={processing} onClick={handleSubmit}>
+                    <Button variant="default" onClick={handleSubmit}>
                         Update
                     </Button>
                 </DialogFooter>
