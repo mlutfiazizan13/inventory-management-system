@@ -91,6 +91,7 @@ export interface Product {
   status: string;
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp
+  inventory: StockItem[];
 }
 
 export interface Category {

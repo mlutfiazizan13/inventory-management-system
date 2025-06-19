@@ -16,17 +16,20 @@ class DashboardController extends Controller
     public function index()
     {
         // Gather your data just like previously...
-        $totalProducts = Product::count();
+        $totalProducts = Product::where('status', 'active')->count();
 
         // dd(Product::with('inventory')->get());
 
-        $lowStock = Product::with('inventory')->get()
-            // ->filter(function ($item) {
-            //     return $item->inventory->quantity;
-            // })
+        $lowStock = Product::with('inventory')
+            ->where('status', 'active')
+            ->get()
+            ->filter(function ($item) {
+                return $item->inventory && $item->inventory->quantity <= 10;
+            })
             ->values();
 
-        $inventoryValue = StockItem::with('product')->get()
+
+        $inventoryValue = StockItem::with('product')->where('status', 'active')->get()
             ->sum(function ($item) {
                 return $item->quantity * $item->product->price;
             });
@@ -34,9 +37,11 @@ class DashboardController extends Controller
         $totalSuppliers = Supplier::count();
 
         $purchasesBySupplier = PurchaseOrder::select('supplier_id', DB::raw('SUM(total_cost) as total'))
+            ->where('status', 'active')
             ->with('supplier')->groupBy('supplier_id')->get();
 
         $statusCounts = PurchaseOrder::select('purchase_order_status', DB::raw('COUNT(id) as total'))
+            ->where('status', 'active')
             ->groupBy('purchase_order_status')
             ->get()
             ->map(function ($item) {
@@ -50,11 +55,12 @@ class DashboardController extends Controller
             DB::raw('MONTH(order_date) as month_number'), // Add numeric month for sorting
         ])
             ->where('purchase_order_status', '!=', 'draft')
+            ->where('status', 'active')
             ->groupBy('month', 'month_number') // Group by both if needed
             ->orderBy('month_number')
             ->get();
 
-        $stockProducts = Product::with('inventory')->get();
+        $stockProducts = Product::with('inventory')->where('status', 'active')->get();
 
         $latestPurchaseOrders = PurchaseOrder::with('Supplier')->where('purchase_order_status', '!=', 'received')->where('status', 'active')->orderBy('created_at')->limit(5)->get();
 
