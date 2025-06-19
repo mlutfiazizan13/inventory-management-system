@@ -63,6 +63,7 @@ class PurchaseOrderController extends Controller
         $purchase_order->expected_date = $request->expected_date;
         $purchase_order->supplier_id = $request->supplier_id;
         $purchase_order->total_cost = $request->total_cost;
+        $purchase_order->created_by = auth()->id();
         $purchase_order->save();
 
         foreach ($request->purchase_order_items as $item) {
