@@ -77,6 +77,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/delete/{id}', [SalesOrderController::class, 'delete'])->name('sales_orders.delete');
         Route::put('/update-status/{id}', [SalesOrderController::class, 'updateStatus'])->name('sales_orders.update_status');
     });
+
+    Route::prefix('inventory-tracking')->group(function () {
+        Route::get('', [InventoryTrackingController::class, 'index'])->name('inventory_tracking.index');
+    });
 });
 
 require __DIR__ . '/settings.php';
