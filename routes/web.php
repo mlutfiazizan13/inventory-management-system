@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/store', [PurchaseOrderController::class, 'store'])->name('purchase_orders.store');
         Route::put('/update/{id}', [PurchaseOrderController::class, 'update'])->name('purchase_orders.update');
         Route::delete('/delete/{id}', [PurchaseOrderController::class, 'delete'])->name('purchase_orders.delete');
+        Route::put('/update-status/{id}', [PurchaseOrderController::class, 'updateStatus'])->name('purchase_orders.update_status');
     });
 
     Route::prefix('customers')->group(function () {
