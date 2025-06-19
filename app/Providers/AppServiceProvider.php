@@ -29,10 +29,9 @@ class AppServiceProvider extends ServiceProvider
                     : null;
             },
             'mainNavItems' => function () {
-                $menus = Menu::orderBy('order')->get();
-                // dd($menus);
-                // dd($menus->filter(fn($item) => $item->parent_id === 'ROLES'));
-                return $this->buildMenuTree($menus);
+                return Auth::user()
+                    ? $this->buildMenuTree(Auth::user()->roles[0]->menus()->orderBy('order')->get()) // only necessary fields
+                    : null;
             }
         ]);
     }

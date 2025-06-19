@@ -2,8 +2,10 @@ import { Supplier } from '@/types';
 import { router } from '@inertiajs/react';
 import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
+import toast from 'react-hot-toast';
 
 interface SupplierState {
+    name: string,
     items: Supplier[];
 
     setItems: (items: Supplier[]) => void;
@@ -32,6 +34,7 @@ interface SupplierState {
 }
 
 export const useSupplierStore = create<SupplierState>((set, get) => ({
+    name: "Supplier",
     items: [],
     setItems: (items) => set({ items: items }),
 
@@ -92,12 +95,11 @@ export const useSupplierStore = create<SupplierState>((set, get) => ({
                 preserveScroll: true,
                 onSuccess: (page) => {
                     get().stopCreating();
-                    useAppStore.getState().addNotification('Item created successfully!', 'success');
-                    get().reloadItems();
+                    toast.success(`${get().name} created successfully!`);
                     resolve();
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to create item', 'error');
+                    toast.error(`Failed to create ${get().name}`);
                     reject(errors);
                 },
             });
@@ -110,11 +112,11 @@ export const useSupplierStore = create<SupplierState>((set, get) => ({
                 preserveScroll: true,
                 onSuccess: () => {
                     get().stopEditing();
-                    useAppStore.getState().addNotification('Item updated successfully!', 'success');
+                    toast.success(`${get().name} updated successfully!`);
                     get().reloadItems();
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to update item', 'error');
+                    toast.error(`Failed to update ${get().name}`);
                     reject(errors);
                 },
             });
@@ -122,13 +124,13 @@ export const useSupplierStore = create<SupplierState>((set, get) => ({
     },
 
     deleteItem: async (id) => {
-        await router.delete(route('suppliers.delete', id), {
+        router.delete(route('suppliers.delete', id), {
             preserveScroll: false,
             onSuccess: () => {
-                useAppStore.getState().addNotification('Item deleted successfully!', 'success');
+                toast.success(`${get().name} deleted successfully!`);
             },
             onError: (errors) => {
-                useAppStore.getState().addNotification('Failed to delete item', 'error');
+                toast.error(`Failed to delete ${get().name}`);
                 throw errors;
             },
         });

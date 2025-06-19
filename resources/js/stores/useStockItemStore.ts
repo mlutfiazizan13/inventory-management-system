@@ -2,8 +2,10 @@ import { StockItem } from '@/types';
 import { router } from '@inertiajs/react';
 import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
+import toast from 'react-hot-toast';
 
 interface StockItemState {
+    name: string,
     // UI state
     isCreating: boolean;
     isEditing: boolean;
@@ -28,6 +30,7 @@ interface StockItemState {
 }
 
 export const useStockItemStore = create<StockItemState>((set, get) => ({
+    name: "Stock Item",
     isCreating: false,
     isEditing: false,
     editingItem: null,
@@ -81,11 +84,11 @@ export const useStockItemStore = create<StockItemState>((set, get) => ({
                 preserveScroll: true,
                 onSuccess: (page) => {
                     get().stopCreating();
-                    useAppStore.getState().addNotification('Item created successfully!', 'success');
+                    toast.success(`${get().name} created successfully!`);
                     resolve();
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to create item', 'error');
+                    toast.error(`Failed to create ${get().name}`);
                     reject(errors);
                 },
             });
@@ -98,11 +101,11 @@ export const useStockItemStore = create<StockItemState>((set, get) => ({
                 preserveScroll: true,
                 onSuccess: () => {
                     get().stopEditing();
-                    useAppStore.getState().addNotification('Item updated successfully!', 'success');
+                    toast.success(`${get().name} updated successfully!`);
                     resolve();
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to update item', 'error');
+                    toast.error(`Failed to update ${get().name}`);
                     reject(errors);
                 },
             });
@@ -114,33 +117,14 @@ export const useStockItemStore = create<StockItemState>((set, get) => ({
             router.delete(route('stock-items.delete', id), {
                 preserveScroll: true,
                 onSuccess: () => {
-                    useAppStore.getState().addNotification('Item deleted successfully!', 'success');
+                    toast.success(`${get().name} deleted successfully!`);
                     resolve();
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to delete item', 'error');
+                    toast.error(`Failed to delete ${get().name}`);
                     reject(errors);
                 },
             });
         });
     },
-
-    // bulkDelete: async (ids) => {
-    //     return new Promise((resolve, reject) => {
-    //         router.delete(route('products.bulk-destroy'), {
-    //             data: { ids },
-    //             preserveScroll: true,
-    //             onSuccess: () => {
-    //                 ids.forEach((id) => get().removeItem(id));
-    //                 get().clearSelection();
-    //                 useAppStore.getState().addNotification(`${ids.length} items deleted successfully!`, 'success');
-    //                 resolve();
-    //             },
-    //             onError: (errors) => {
-    //                 useAppStore.getState().addNotification('Failed to delete items', 'error');
-    //                 reject(errors);
-    //             },
-    //         });
-    //     });
-    // },
 }));

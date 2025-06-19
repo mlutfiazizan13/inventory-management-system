@@ -2,8 +2,10 @@ import { Customer } from '@/types';
 import { router } from '@inertiajs/react';
 import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
+import toast from 'react-hot-toast';
 
 interface CustomerState<T> {
+    name: string;
     items: T[];
 
     setItems: (items: T[]) => void;
@@ -32,6 +34,7 @@ interface CustomerState<T> {
 }
 
 export const useCustomerStore = create<CustomerState<Customer>>((set, get) => ({
+    name: "Customer",
     items: [],
     setItems: (items) => set({ items: items }),
 
@@ -89,16 +92,14 @@ export const useCustomerStore = create<CustomerState<Customer>>((set, get) => ({
     createItem: async (data) => {
         return new Promise((resolve, reject) => {
             router.post(route('customers.store'), data as any, {
-                preserveState: false,
                 preserveScroll: true,
                 onSuccess: (page) => {
                     get().stopCreating();
-                    useAppStore.getState().addNotification('Item created successfully!', 'success');
-                    get().reloadItems();
+                    toast.success(`${get().name} created successfully!`);
                     resolve();
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to create item', 'error');
+                    toast.success(`${get().name} created successfully!`);
                     reject(errors);
                 },
             });
@@ -111,11 +112,10 @@ export const useCustomerStore = create<CustomerState<Customer>>((set, get) => ({
                 preserveScroll: true,
                 onSuccess: () => {
                     get().stopEditing();
-                    useAppStore.getState().addNotification('Item updated successfully!', 'success');
-                    get().reloadItems();
+                    toast.success(`${get().name} created successfully!`);
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to update item', 'error');
+                    toast.error(`Failed to create ${get().name}`);
                     reject(errors);
                 },
             });
@@ -123,14 +123,13 @@ export const useCustomerStore = create<CustomerState<Customer>>((set, get) => ({
     },
 
     deleteItem: async (id) => {
-        await router.delete(route('customers.delete', id), {
-            preserveState: false, // force reload fresh data
+        router.delete(route('customers.delete', id), {
             preserveScroll: false,
             onSuccess: () => {
-                useAppStore.getState().addNotification('Item deleted successfully!', 'success');
+                toast.success(`${get().name} created successfully!`);
             },
             onError: (errors) => {
-                useAppStore.getState().addNotification('Failed to delete item', 'error');
+                toast.error(`Failed to create ${get().name}`);
                 throw errors;
             },
         });

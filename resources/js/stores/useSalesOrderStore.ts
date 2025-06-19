@@ -2,8 +2,10 @@ import { EditSalesOrder, SalesOrder } from '@/types';
 import { router } from '@inertiajs/react';
 import { create } from 'zustand';
 import { useAppStore } from './useAppStore';
+import toast from 'react-hot-toast';
 
 interface SalesOrderState<T, C, E> {
+    name: string,
     items: T[];
 
     setItems: (items: T[]) => void;
@@ -38,6 +40,7 @@ interface SalesOrderState<T, C, E> {
 }
 
 export const useSalesOrderStore = create<SalesOrderState<SalesOrder, SalesOrder, EditSalesOrder>>((set, get) => ({
+    name: "Sales Order", 
     items: [],
     setItems: (items) => set({ items: items }),
 
@@ -66,7 +69,7 @@ export const useSalesOrderStore = create<SalesOrderState<SalesOrder, SalesOrder,
             editingItem: null,
         }),
 
-    startDeleting: (item: SalesOrder) =>
+    startDeleting: (item) =>
         set({
             isDeleting: true,
             deletingItem: item,
@@ -77,7 +80,7 @@ export const useSalesOrderStore = create<SalesOrderState<SalesOrder, SalesOrder,
             deletingItem: null,
         }),
 
-    startUpdateStatus: (item: SalesOrder) =>
+    startUpdateStatus: (item) =>
         set({
             isUpdateStatus: true,
             updateStatusItem: item,
@@ -112,11 +115,11 @@ export const useSalesOrderStore = create<SalesOrderState<SalesOrder, SalesOrder,
                 preserveScroll: true,
                 onSuccess: (page) => {
                     get().stopCreating();
-                    useAppStore.getState().addNotification('Item created successfully!', 'success');
+                    toast.success(`${get().name} created successfully!`);
                     resolve();
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to create item', 'error');
+                    toast.error(`Failed to create ${get().name}`);
                     reject(errors);
                 },
             });
@@ -129,10 +132,10 @@ export const useSalesOrderStore = create<SalesOrderState<SalesOrder, SalesOrder,
                 preserveScroll: true,
                 onSuccess: () => {
                     get().stopEditing();
-                    useAppStore.getState().addNotification('Item updated successfully!', 'success');
+                    toast.success(`${get().name} updated successfully!`);
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to update item', 'error');
+                    toast.error(`Failed to update ${get().name}`);
                     reject(errors);
                 },
             });
@@ -140,13 +143,13 @@ export const useSalesOrderStore = create<SalesOrderState<SalesOrder, SalesOrder,
     },
 
     deleteItem: async (id) => {
-        await router.delete(route('sales_orders.delete', id), {
+        router.delete(route('sales_orders.delete', id), {
             preserveScroll: false,
             onSuccess: () => {
-                useAppStore.getState().addNotification('Item deleted successfully!', 'success');
+                toast.success(`${get().name} deleted successfully!`);
             },
             onError: (errors) => {
-                useAppStore.getState().addNotification('Failed to delete item', 'error');
+                toast.error(`Failed to delete ${get().name}`);
                 throw errors;
             },
         });
@@ -158,10 +161,10 @@ export const useSalesOrderStore = create<SalesOrderState<SalesOrder, SalesOrder,
                 preserveScroll: true,
                 onSuccess: () => {
                     get().stopUpdateStatus();
-                    useAppStore.getState().addNotification('Sales Order status updated successfully!', 'success');
+                    toast.success(`${get().name} status updated successfully!`);
                 },
                 onError: (errors) => {
-                    useAppStore.getState().addNotification('Failed to update item', 'error');
+                    toast.error(`Failed to update status ${get().name}`);
                     reject(errors);
                 },
             });
