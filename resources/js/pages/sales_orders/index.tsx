@@ -293,6 +293,18 @@ export default function Salesrders() {
                 id={updateStatusItem?.id}
             />
 
+            <DeleteDialog<SalesOrder | null, string>
+                resource={useSalesOrderStore().deletingItem}
+                id={deletingItem?.id}
+                onDelete={useSalesOrderStore().deleteItem}
+                open={useSalesOrderStore.getState().isDeleting}
+                onOpenChange={() => {
+                    stopDeleting();
+                }}
+                itemName="sales order"
+                renderName={String(deletingItem?.customer.name)}
+            />
+
             {/* <UpdateStatus<string>
                 title='Update Status'
                 message='are you sure to update this status ?'
